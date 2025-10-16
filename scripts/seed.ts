@@ -122,7 +122,7 @@ async function main() {
     where: { email: "mickelsamuel.b@gmail.com" },
     update: {},
     create: {
-      name: "Admin",
+      name: "Mickel Samuel",
       email: "mickelsamuel.b@gmail.com",
       password: hashedPassword,
       role: "admin",

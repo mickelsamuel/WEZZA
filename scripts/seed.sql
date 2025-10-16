@@ -106,7 +106,7 @@ ON CONFLICT (slug) DO NOTHING;
 INSERT INTO "User" (id, name, email, password, role, "emailVerified", "createdAt", "updatedAt")
 VALUES (
   gen_random_uuid(),
-  'Admin',
+  'Mickel Samuel',
   'mickelsamuel.b@gmail.com',
   '$2b$10$QAj.uLME/GS9B1f9iExqluS0wQVGXWeRY7v2amCFCsZGsz5fr.BmC',
   'admin',
