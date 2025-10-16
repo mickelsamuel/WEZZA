@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/email-automation?type=cart_abandonment",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/email-automation?type=post_purchase",
+      "schedule": "0 10 * * *"
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { X, User, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { useSession, signOut } from "next-auth/react";
+
+interface MobileNavProps {
+  isOpen: boolean;
+  onClose: () => void;
+  links: { href: string; label: string }[];
+  onAuthModalOpen?: () => void;
+}
+
+export function MobileNav({ isOpen, onClose, links, onAuthModalOpen }: MobileNavProps) {
+  const pathname = usePathname();
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 md:hidden">
+      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+      <div className="fixed right-0 top-0 h-full w-3/4 max-w-sm bg-background p-6 shadow-lg">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-2xl font-bold">Menu</h2>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+        <nav className="mt-8 flex flex-col gap-4">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={onClose}
+              className={`rounded-md px-4 py-3 font-medium transition-colors ${
+                pathname === link.href
+                  ? "bg-brand-orange text-white"
+                  : "hover:bg-brand-gray"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+
+          {/* Auth Section */}
+          <div className="mt-6 border-t pt-6">
+            {status === "authenticated" ? (
+              <div className="flex flex-col gap-3">
+                <div className="px-4 py-2">
+                  <p className="font-medium">{session?.user?.name || "User"}</p>
+                  <p className="text-sm text-muted-foreground">{session?.user?.email}</p>
+                </div>
+                <Link
+                  href="/account"
+                  onClick={onClose}
+                  className="rounded-md px-4 py-3 font-medium hover:bg-brand-gray transition-colors"
+                >
+                  My Account
+                </Link>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    signOut({ callbackUrl: "/" });
+                    onClose();
+                  }}
+                  className="justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={() => {
+                  onClose();
+                  onAuthModalOpen?.();
+                }}
+                className="w-full bg-brand-orange hover:bg-brand-orange/90"
+              >
+                <User className="mr-2 h-5 w-5" />
+                Sign In
+              </Button>
+            )}
+          </div>
+        </nav>
+      </div>
+    </div>
+  );
+}

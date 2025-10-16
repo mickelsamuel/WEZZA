@@ -1,0 +1,168 @@
+[
+  {
+    "slug": "lunar-black",
+    "title": "Lunar Hoodie — Black",
+    "description": "Our signature Lunar collection features a minimalist moon phase print on premium heavyweight cotton. Built for comfort, designed to stand out.",
+    "price": 6999,
+    "currency": "CAD",
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "colors": ["black"],
+    "collection": "Lunar",
+    "images": [
+      "/images/products/lunar-black-1.jpg",
+      "/images/products/lunar-black-2.jpg",
+      "/images/products/lunar-black-3.jpg"
+    ],
+    "featured": true,
+    "inStock": true,
+    "tags": ["bestseller", "new"],
+    "fabric": "100% premium heavyweight cotton (350gsm)",
+    "care": "Machine wash cold, tumble dry low. Do not bleach.",
+    "shipping": "Free shipping on orders over $100 CAD. 5-7 business days delivery."
+  },
+  {
+    "slug": "core-black",
+    "title": "Core Hoodie — Black",
+    "description": "The essential black hoodie. Refined fit, heavyweight construction, and that perfect lived-in feel from day one.",
+    "price": 5999,
+    "currency": "CAD",
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "colors": ["black"],
+    "collection": "Core",
+    "images": [
+      "/images/products/core-black-1.jpg",
+      "/images/products/core-black-2.jpg",
+      "/images/products/core-black-3.jpg"
+    ],
+    "featured": true,
+    "inStock": true,
+    "tags": ["core", "bestseller"],
+    "fabric": "100% premium heavyweight cotton (350gsm)",
+    "care": "Machine wash cold, tumble dry low. Do not bleach.",
+    "shipping": "Free shipping on orders over $100 CAD. 5-7 business days delivery."
+  },
+  {
+    "slug": "core-peach",
+    "title": "Core Hoodie — Peach",
+    "description": "Soft peach colorway meets classic silhouette. A subtle statement piece that pairs with everything.",
+    "price": 5999,
+    "currency": "CAD",
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "colors": ["peach"],
+    "collection": "Core",
+    "images": [
+      "/images/products/core-peach-1.jpg",
+      "/images/products/core-peach-2.jpg",
+      "/images/products/core-peach-3.jpg"
+    ],
+    "featured": true,
+    "inStock": true,
+    "tags": ["core"],
+    "fabric": "100% premium heavyweight cotton (350gsm)",
+    "care": "Machine wash cold, tumble dry low. Do not bleach.",
+    "shipping": "Free shipping on orders over $100 CAD. 5-7 business days delivery."
+  },
+  {
+    "slug": "core-brown",
+    "title": "Core Hoodie — Burnt Orange",
+    "description": "Our signature burnt orange. Bold without being loud, this hoodie commands attention in the best way.",
+    "price": 5999,
+    "currency": "CAD",
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "colors": ["orange"],
+    "collection": "Core",
+    "images": [
+      "/images/products/core-brown-1.jpg",
+      "/images/products/core-brown-2.jpg",
+      "/images/products/core-brown-3.jpg"
+    ],
+    "featured": true,
+    "inStock": true,
+    "tags": ["core"],
+    "fabric": "100% premium heavyweight cotton (350gsm)",
+    "care": "Machine wash cold, tumble dry low. Do not bleach.",
+    "shipping": "Free shipping on orders over $100 CAD. 5-7 business days delivery."
+  },
+  {
+    "slug": "core-gray",
+    "title": "Core Hoodie — Warm Gray",
+    "description": "The versatile gray that goes with everything. A wardrobe foundation piece you'll reach for daily.",
+    "price": 5999,
+    "currency": "CAD",
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "colors": ["gray"],
+    "collection": "Core",
+    "images": [
+      "/images/products/core-gray-1.jpg",
+      "/images/products/core-gray-2.jpg",
+      "/images/products/core-gray-3.jpg"
+    ],
+    "featured": false,
+    "inStock": true,
+    "tags": ["core"],
+    "fabric": "100% premium heavyweight cotton (350gsm)",
+    "care": "Machine wash cold, tumble dry low. Do not bleach.",
+    "shipping": "Free shipping on orders over $100 CAD. 5-7 business days delivery."
+  },
+  {
+    "slug": "lunar-white",
+    "title": "Lunar Hoodie — White",
+    "description": "The Lunar collection in clean white with subtle moon phase detailing. A statement of simplicity.",
+    "price": 6999,
+    "currency": "CAD",
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "colors": ["white"],
+    "collection": "Lunar",
+    "images": [
+      "/images/products/lunar-white-1.jpg",
+      "/images/products/lunar-white-2.jpg",
+      "/images/products/lunar-white-3.jpg"
+    ],
+    "featured": false,
+    "inStock": true,
+    "tags": ["new"],
+    "fabric": "100% premium heavyweight cotton (350gsm)",
+    "care": "Machine wash cold, tumble dry low. Do not bleach.",
+    "shipping": "Free shipping on orders over $100 CAD. 5-7 business days delivery."
+  },
+  {
+    "slug": "custom-black",
+    "title": "Custom Hoodie — Black",
+    "description": "Start with our premium black base and make it yours. Add your design, text, or artwork.",
+    "price": 8999,
+    "currency": "CAD",
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "colors": ["black"],
+    "collection": "Customizable",
+    "images": [
+      "/images/products/custom-black-1.jpg",
+      "/images/products/custom-black-2.jpg"
+    ],
+    "featured": false,
+    "inStock": true,
+    "tags": ["custom"],
+    "fabric": "100% premium heavyweight cotton (350gsm)",
+    "care": "Machine wash cold, tumble dry low. Do not bleach.",
+    "shipping": "Custom orders ship within 2-3 weeks. Expedited available."
+  },
+  {
+    "slug": "custom-white",
+    "title": "Custom Hoodie — White",
+    "description": "The perfect blank canvas. Premium white hoodie ready for your custom design.",
+    "price": 8999,
+    "currency": "CAD",
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "colors": ["white"],
+    "collection": "Customizable",
+    "images": [
+      "/images/products/custom-white-1.jpg",
+      "/images/products/custom-white-2.jpg"
+    ],
+    "featured": false,
+    "inStock": true,
+    "tags": ["custom"],
+    "fabric": "100% premium heavyweight cotton (350gsm)",
+    "care": "Machine wash cold, tumble dry low. Do not bleach.",
+    "shipping": "Custom orders ship within 2-3 weeks. Expedited available."
+  }
+]
