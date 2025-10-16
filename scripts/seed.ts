@@ -116,25 +116,25 @@ async function main() {
   }
 
   // Create admin user
-  const hashedPassword = await bcrypt.hash("admin123", 10);
+  const hashedPassword = await bcrypt.hash("Mic13245", 10);
 
   const adminUser = await prisma.user.upsert({
-    where: { email: "admin@wezza.com" },
+    where: { email: "mickelsamuel.b@gmail.com" },
     update: {},
     create: {
       name: "Admin",
-      email: "admin@wezza.com",
+      email: "mickelsamuel.b@gmail.com",
       password: hashedPassword,
       role: "admin",
       emailVerified: new Date(),
     },
   });
 
-  console.log("✓ Created admin user (email: admin@wezza.com, password: admin123)");
+  console.log("✓ Created admin user (email: mickelsamuel.b@gmail.com, password: Mic13245)");
 
   console.log("\n✅ Database seeded successfully!");
   console.log("\nYou can now:");
-  console.log("1. Login as admin: admin@wezza.com / admin123");
+  console.log("1. Login as admin: mickelsamuel.b@gmail.com / Mic13245");
   console.log("2. View products on the homepage");
   console.log("3. Add more products via the admin panel");
 }
