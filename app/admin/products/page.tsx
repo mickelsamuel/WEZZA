@@ -69,12 +69,14 @@ export default async function ProductsPage() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 relative rounded-md overflow-hidden bg-gray-100">
-                        <Image
-                          src={product.images[0]}
-                          alt={product.title}
-                          fill
-                          className="object-cover"
-                        />
+                        {(product.images as string[])?.[0] && (
+                          <Image
+                            src={(product.images as string[])[0]}
+                            alt={product.title}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
                       </div>
                       <div>
                         <p className="font-medium">{product.title}</p>
@@ -94,7 +96,7 @@ export default async function ProductsPage() {
                       {product.featured && (
                         <Badge variant="secondary">Featured</Badge>
                       )}
-                      {product.tags.includes("bestseller") && (
+                      {(product.tags as string[])?.includes("bestseller") && (
                         <Badge variant="secondary">Bestseller</Badge>
                       )}
                     </div>

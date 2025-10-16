@@ -67,16 +67,16 @@ export async function GET(request: NextRequest) {
       description: p.description,
       price: p.price,
       currency: p.currency,
-      collection: p.collection?.name || "Core",
-      images: p.images,
+      collection: (p.collection?.name || "Core") as "Core" | "Lunar" | "Customizable",
+      images: (p.images as string[]) || [],
       inStock: p.inStock,
       featured: p.featured,
       fabric: p.fabric,
       care: p.care,
       shipping: p.shipping,
-      sizes: p.sizes,
-      colors: p.colors,
-      tags: p.tags,
+      sizes: (p.sizes as string[]) || [],
+      colors: (p.colors as string[]) || [],
+      tags: (p.tags as string[]) || [],
     }));
 
     return NextResponse.json({ products: transformedProducts });

@@ -40,15 +40,17 @@ export async function POST(request: NextRequest) {
         throw new Error(`Product not found: ${item.slug}`);
       }
 
+      const images = (product.images as string[]) || [];
+
       return {
         price_data: {
           currency: "cad",
           product_data: {
             name: `${product.title} (${item.size})`,
             description: product.description,
-            images: [
-              `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}${product.images[0]}`,
-            ],
+            images: images.length > 0 ? [
+              `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}${images[0]}`,
+            ] : [],
             metadata: {
               slug: product.slug,
               size: item.size,

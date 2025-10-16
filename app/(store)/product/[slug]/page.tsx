@@ -34,13 +34,15 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     };
   }
 
+  const images = (productData.images as string[]) || [];
+
   return {
     title: `${productData.title} | WEZZA`,
     description: productData.description,
     openGraph: {
       title: productData.title,
       description: productData.description,
-      images: [productData.images[0]],
+      images: images.length > 0 ? [images[0]] : [],
     },
   };
 }
@@ -66,16 +68,16 @@ export default async function ProductPage({ params }: { params: { slug: string }
     description: productData.description,
     price: productData.price,
     currency: productData.currency,
-    collection: productData.collection?.name || "Core",
-    images: productData.images,
+    collection: (productData.collection?.name || "Core") as "Core" | "Lunar" | "Customizable",
+    images: (productData.images as string[]) || [],
     inStock: productData.inStock,
     featured: productData.featured,
     fabric: productData.fabric,
     care: productData.care,
     shipping: productData.shipping,
-    sizes: productData.sizes,
-    colors: productData.colors,
-    tags: productData.tags,
+    sizes: (productData.sizes as string[]) || [],
+    colors: (productData.colors as string[]) || [],
+    tags: (productData.tags as string[]) || [],
   };
 
   return (
