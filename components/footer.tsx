@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Instagram, Facebook, Twitter } from "lucide-react";
+import { Instagram } from "lucide-react";
 import { getContentBySection } from "@/lib/site-content";
 
 export async function Footer() {
@@ -81,28 +81,12 @@ export async function Footer() {
             </h4>
             <div className="mt-4 flex gap-4">
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/wezza_ca?utm_source=ig_web_button_share_sheet&igsh=MTN5d3E5NHB1Mjc2Yw=="
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-brand-orange"
               >
                 <Instagram className="h-5 w-5" />
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-brand-orange"
-              >
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-brand-orange"
-              >
-                <Twitter className="h-5 w-5" />
               </a>
             </div>
           </div>

@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/currency";
 import Link from "next/link";
-import { Package, FolderOpen, BarChart3, Users, ShoppingCart, Image, Star, FileText, UserCog } from "lucide-react";
+import { Package, FolderOpen, BarChart3, Users, ShoppingCart, Image, Star, FileText, UserCog, Mail } from "lucide-react";
 
 async function getDashboardStats() {
   const [
@@ -129,6 +129,13 @@ export default async function AdminDashboard() {
       href: "/admin/users",
       icon: UserCog,
       color: "bg-cyan-500",
+    },
+    {
+      title: "Email Templates",
+      description: "Manage and customize email templates",
+      href: "/admin/email-templates",
+      icon: Mail,
+      color: "bg-teal-500",
     },
   ];
 
