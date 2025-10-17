@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/currency";
 import Link from "next/link";
-import { Package, FolderOpen, BarChart3, Users, ShoppingCart, Image, Database, Star } from "lucide-react";
+import { Package, FolderOpen, BarChart3, Users, ShoppingCart, Image, Star } from "lucide-react";
 
 async function getDashboardStats() {
   const [
@@ -120,19 +120,11 @@ export default async function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-1">
-            Welcome back! Manage your store from here
-          </p>
-        </div>
-        <Link href="http://localhost:5555" target="_blank" rel="noopener noreferrer">
-          <Button className="flex items-center gap-2 bg-brand-orange hover:bg-brand-orange/90">
-            <Database className="h-5 w-5" />
-            Open Database
-          </Button>
-        </Link>
+      <div>
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <p className="text-gray-600 mt-1">
+          Welcome back! Manage your store from here
+        </p>
       </div>
 
       {/* Quick Access Links */}
