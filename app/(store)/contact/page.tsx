@@ -58,7 +58,7 @@ export default function ContactPage() {
               href="mailto:hello@wezza.com"
               className="mt-4 inline-block font-semibold text-brand-orange hover:underline"
             >
-              hello@wezza.com
+              wezza28711@gmail.com
             </a>
           </Card>
 
@@ -72,7 +72,7 @@ export default function ContactPage() {
               href="mailto:custom@wezza.com"
               className="mt-4 inline-block font-semibold text-brand-orange hover:underline"
             >
-              custom@wezza.com
+              wezza28711@gmail.com
             </a>
           </Card>
         </div>
