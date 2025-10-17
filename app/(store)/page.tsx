@@ -31,44 +31,57 @@ const VALUE_PROPS = [
 ];
 
 export default async function HomePage() {
-  // Get featured products from database
-  const featuredProductsData = await prisma.product.findMany({
-    where: { featured: true },
-    include: {
-      collection: {
-        select: { name: true },
+  // Get featured products from database with error handling
+  let featuredProducts = [];
+  let dbError = false;
+  try {
+    const featuredProductsData = await prisma.product.findMany({
+      where: { featured: true },
+      include: {
+        collection: {
+          select: { name: true },
+        },
       },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+      orderBy: { createdAt: "desc" },
+    });
 
-  // Transform to match Product type
-  const featuredProducts = featuredProductsData.map((p: any) => ({
-    slug: p.slug,
-    title: p.title,
-    description: p.description,
-    price: p.price,
-    currency: p.currency,
-    collection: (p.collection?.name || "Core") as "Core" | "Lunar" | "Customizable",
-    images: (p.images as string[]) || [],
-    inStock: p.inStock,
-    featured: p.featured,
-    fabric: p.fabric,
-    care: p.care,
-    shipping: p.shipping,
-    sizes: (p.sizes as string[]) || [],
-    colors: (p.colors as string[]) || [],
-    tags: (p.tags as string[]) || [],
-  }));
+    // Transform to match Product type
+    featuredProducts = featuredProductsData.map((p: any) => ({
+      slug: p.slug,
+      title: p.title,
+      description: p.description,
+      price: p.price,
+      currency: p.currency,
+      collection: (p.collection?.name || "Core") as "Core" | "Lunar" | "Customizable",
+      images: (p.images as string[]) || [],
+      inStock: p.inStock,
+      featured: p.featured,
+      fabric: p.fabric,
+      care: p.care,
+      shipping: p.shipping,
+      sizes: (p.sizes as string[]) || [],
+      colors: (p.colors as string[]) || [],
+      tags: (p.tags as string[]) || [],
+    }));
+  } catch (error) {
+    console.error("Database connection error:", error);
+    dbError = true;
+    // Continue with empty array - page will still render
+  }
 
   // Get personalized recommendations for logged-in users
   const session = await getServerSession(authOptions);
   let personalizedProducts = null;
   if (session?.user?.id) {
-    personalizedProducts = await getPersonalizedRecommendations(
-      session.user.id,
-      4
-    );
+    try {
+      personalizedProducts = await getPersonalizedRecommendations(
+        session.user.id,
+        4
+      );
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      // Continue without recommendations
+    }
   }
 
   return (
@@ -95,6 +108,13 @@ export default async function HomePage() {
             <h2 className="font-heading text-3xl font-bold md:text-4xl">Featured Hoodies</h2>
             <p className="mt-2 text-muted-foreground">Our most popular styles</p>
           </div>
+          {dbError && (
+            <div className="mb-8 rounded-lg bg-yellow-50 border border-yellow-200 p-4 text-center">
+              <p className="text-sm text-yellow-800">
+                <strong>Development Mode:</strong> Database unavailable. Products will appear once connected.
+              </p>
+            </div>
+          )}
           <ProductGrid products={featuredProducts} />
           <div className="mt-12 text-center">
             <Link href="/shop">
