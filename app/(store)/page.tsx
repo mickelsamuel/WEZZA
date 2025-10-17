@@ -41,7 +41,7 @@ export default async function HomePage() {
   });
 
   // Transform to match Product type
-  const featuredProducts = featuredProductsData.map((p) => ({
+  const featuredProducts = featuredProductsData.map((p: any) => ({
     slug: p.slug,
     title: p.title,
     description: p.description,
