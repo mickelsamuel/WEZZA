@@ -1,6 +1,6 @@
 # WEZZA Store
 
-A modern, full-featured e-commerce store for premium streetwear hoodies built with Next.js 14, TypeScript, and Tailwind CSS.
+A modern, full-featured e-commerce platform for premium streetwear hoodies built with Next.js 14, TypeScript, and Tailwind CSS.
 
 ## Features
 
