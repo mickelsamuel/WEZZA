@@ -73,6 +73,7 @@ model User {
   stockNotifications  StockNotification[]
   savedPaymentMethods SavedPaymentMethod[]
   sizingProfile       UserSizingProfile?
+  productCollaborations ProductCollaborator[]
 
   @@index([email])
   @@index([role])
@@ -403,6 +404,7 @@ model Product {
   updatedAt    DateTime @updatedAt
 
   collection Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  collaborators ProductCollaborator[]
 
   @@index([slug])
   @@index([collectionId])
@@ -436,4 +438,20 @@ model SiteContent {
 
   @@index([key])
   @@index([section])
+}
+
+// Product collaborators - many-to-many relationship
+model ProductCollaborator {
+  id        String   @id @default(cuid())
+  productId String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId]) // A user can only be added once per product
+  @@index([productId])
+  @@index([userId])
 }

@@ -12,8 +12,11 @@ import { toast } from "sonner";
 import { ArrowLeft, Save, Upload, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { CollaboratorManager } from "@/components/admin/collaborator-manager";
+import { ProductStats } from "@/components/product-stats";
 
 interface ProductData {
+  id?: string;
   slug: string;
   title: string;
   description: string;
@@ -416,6 +419,22 @@ export default function EditProductPage() {
           </Link>
         </div>
       </form>
+
+      {/* Product Analytics */}
+      {product.id && (
+        <ProductStats
+          productId={product.id}
+          productTitle={product.title}
+        />
+      )}
+
+      {/* Collaborator Management Section - Separate from form */}
+      {product.id && (
+        <CollaboratorManager
+          productId={product.id}
+          productTitle={product.title}
+        />
+      )}
     </div>
   );
 }
