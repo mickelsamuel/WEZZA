@@ -58,7 +58,7 @@ model User {
   emailVerified DateTime?
   password      String? // For credentials provider
   image         String?
-  role          String    @default("customer") // customer, admin
+  role          String    @default("customer") // customer, admin, collaborator
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

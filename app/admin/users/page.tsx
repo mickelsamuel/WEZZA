@@ -23,7 +23,8 @@ export default async function UsersPage() {
 
   const totalUsers = users.length;
   const adminUsers = users.filter(u => u.role?.toLowerCase() === "admin").length;
-  const regularUsers = users.filter(u => u.role?.toLowerCase() === "user").length;
+  const collaboratorUsers = users.filter(u => u.role?.toLowerCase() === "collaborator").length;
+  const regularUsers = users.filter(u => u.role?.toLowerCase() === "user" || u.role?.toLowerCase() === "customer").length;
 
   return (
     <div className="space-y-6">
@@ -40,7 +41,7 @@ export default async function UsersPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-3">
             <CardDescription>Total Users</CardDescription>
@@ -51,6 +52,12 @@ export default async function UsersPage() {
           <CardHeader className="pb-3">
             <CardDescription>Administrators</CardDescription>
             <CardTitle className="text-3xl">{adminUsers}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Collaborators</CardDescription>
+            <CardTitle className="text-3xl">{collaboratorUsers}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -99,7 +106,11 @@ export default async function UsersPage() {
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                      <Badge variant={user.role?.toLowerCase() === "admin" ? "default" : "secondary"}>
+                      <Badge variant={
+                        user.role?.toLowerCase() === "admin" ? "default" :
+                        user.role?.toLowerCase() === "collaborator" ? "outline" :
+                        "secondary"
+                      }>
                         {user.role}
                       </Badge>
                     </TableCell>

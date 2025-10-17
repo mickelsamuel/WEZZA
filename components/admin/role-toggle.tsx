@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ChevronDown, Shield, User, Loader2 } from "lucide-react";
+import { ChevronDown, Shield, User, Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -103,6 +103,16 @@ export function RoleToggle({ userId, currentRole, userName }: RoleToggleProps) {
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
+            onClick={() => confirmRoleChange("collaborator")}
+            disabled={currentRole?.toLowerCase() === "collaborator"}
+          >
+            <Users className="mr-2 h-4 w-4" />
+            Collaborator
+            {currentRole?.toLowerCase() === "collaborator" && (
+              <span className="ml-auto text-xs text-muted-foreground">(Current)</span>
+            )}
+          </DropdownMenuItem>
+          <DropdownMenuItem
             onClick={() => confirmRoleChange("admin")}
             disabled={currentRole?.toLowerCase() === "admin"}
           >
@@ -127,9 +137,19 @@ export function RoleToggle({ userId, currentRole, userName }: RoleToggleProps) {
                   This will give the user full administrative access to the system.
                 </span>
               )}
+              {newRole?.toLowerCase() === "collaborator" && (
+                <span className="block mt-2 text-blue-600">
+                  This will give the user collaborator access with limited administrative privileges.
+                </span>
+              )}
               {newRole?.toLowerCase() === "user" && currentRole?.toLowerCase() === "admin" && (
                 <span className="block mt-2 text-orange-600">
                   This will remove all administrative privileges from this user.
+                </span>
+              )}
+              {newRole?.toLowerCase() === "user" && currentRole?.toLowerCase() === "collaborator" && (
+                <span className="block mt-2 text-orange-600">
+                  This will remove all collaborator privileges from this user.
                 </span>
               )}
             </AlertDialogDescription>

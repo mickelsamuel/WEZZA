@@ -38,9 +38,9 @@ export async function PATCH(request: NextRequest) {
     }
 
     const normalizedRole = role.toLowerCase();
-    if (normalizedRole !== "user" && normalizedRole !== "admin") {
+    if (normalizedRole !== "user" && normalizedRole !== "admin" && normalizedRole !== "collaborator") {
       return NextResponse.json(
-        { error: "Invalid role. Must be user or admin" },
+        { error: "Invalid role. Must be user, admin, or collaborator" },
         { status: 400 }
       );
     }
