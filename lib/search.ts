@@ -1,5 +1,5 @@
 import { Product } from "./types";
-import { getAllProducts } from "./products";
+import { prisma } from "./prisma";
 
 export interface SearchResult {
   product: Product;
@@ -8,15 +8,43 @@ export interface SearchResult {
 }
 
 /**
- * Search products with ranking algorithm
+ * Search products with ranking algorithm (async - queries database)
  */
-export function searchProducts(query: string): SearchResult[] {
+export async function searchProducts(query: string): Promise<SearchResult[]> {
   if (!query || query.trim().length === 0) {
     return [];
   }
 
   const searchQuery = query.trim().toLowerCase();
-  const allProducts = getAllProducts();
+
+  // Get all products from database
+  const dbProducts = await prisma.product.findMany({
+    include: {
+      collection: {
+        select: { name: true },
+      },
+    },
+  });
+
+  // Transform to Product type
+  const allProducts: Product[] = dbProducts.map((p: any) => ({
+    slug: p.slug,
+    title: p.title,
+    description: p.description,
+    price: p.price,
+    currency: p.currency,
+    collection: (p.collection?.name || "Core") as "Core" | "Lunar" | "Customizable",
+    images: (p.images as string[]) || [],
+    inStock: p.inStock,
+    featured: p.featured,
+    fabric: p.fabric,
+    care: p.care,
+    shipping: p.shipping,
+    sizes: (p.sizes as string[]) || [],
+    colors: (p.colors as string[]) || [],
+    tags: (p.tags as string[]) || [],
+  }));
+
   const results: SearchResult[] = [];
 
   for (const product of allProducts) {
@@ -99,19 +127,30 @@ export function getPopularSearches(): string[] {
 }
 
 /**
- * Get search suggestions based on partial query
+ * Get search suggestions based on partial query (async - queries database)
  */
-export function getSearchSuggestions(query: string): string[] {
+export async function getSearchSuggestions(query: string): Promise<string[]> {
   if (!query || query.trim().length < 2) {
     return getPopularSearches().slice(0, 5);
   }
 
   const searchQuery = query.trim().toLowerCase();
-  const allProducts = getAllProducts();
+
+  // Get all products from database
+  const dbProducts = await prisma.product.findMany({
+    select: {
+      title: true,
+      colors: true,
+      collection: {
+        select: { name: true },
+      },
+    },
+  });
+
   const suggestions = new Set<string>();
 
   // Add matching product titles
-  allProducts.forEach((product) => {
+  dbProducts.forEach((product: any) => {
     if (product.title.toLowerCase().includes(searchQuery)) {
       suggestions.add(product.title);
     }

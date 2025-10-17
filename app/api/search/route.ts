@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -16,12 +18,12 @@ export async function GET(request: NextRequest) {
 
     // Get suggestions
     if (type === "suggestions") {
-      const suggestions = getSearchSuggestions(query);
+      const suggestions = await getSearchSuggestions(query);
       return NextResponse.json({ suggestions });
     }
 
     // Perform search
-    const results = searchProducts(query);
+    const results = await searchProducts(query);
 
     // Log search to database for analytics
     try {
