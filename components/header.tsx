@@ -44,8 +44,9 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center -ml-2">
+        <div className="container mx-auto flex h-16 items-center px-4 relative">
+          {/* Logo - Left Side */}
+          <Link href="/" className="flex items-center -ml-2 z-10">
             <Image
               src="/logo.png"
               alt="WEZZA Logo"
@@ -55,8 +56,8 @@ export function Header() {
             />
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden gap-8 md:flex">
+          {/* Desktop Navigation - Absolutely Centered */}
+          <nav className="hidden md:flex gap-8 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
@@ -70,7 +71,8 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-4">
+          {/* Right Side Actions */}
+          <div className="flex items-center gap-4 ml-auto z-10">
             {/* Search Bar */}
             <SearchBar />
 
