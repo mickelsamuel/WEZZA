@@ -10,6 +10,8 @@ import { authOptions } from "@/lib/auth";
 import ProductRecommendations from "@/components/product-recommendations";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 const VALUE_PROPS = [
   {
     icon: Sparkles,
