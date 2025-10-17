@@ -22,8 +22,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ images: [] });
     }
 
-    // Parse the images from JSON
-    const images = (gallery.url as any) || [];
+    // Parse the images from JSON string
+    let images = [];
+    try {
+      images = JSON.parse(gallery.url as string);
+      // Ensure it's an array
+      if (!Array.isArray(images)) {
+        images = [];
+      }
+    } catch (error) {
+      console.error("Failed to parse Instagram images:", error);
+      images = [];
+    }
 
     return NextResponse.json({ images });
   } catch (error) {
