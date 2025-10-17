@@ -40,7 +40,23 @@ export function ProductReviews({ productSlug }: ProductReviewsProps) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [content, setContent] = useState<Record<string, string>>({});
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetch("/api/site-content?section=reviews")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   useEffect(() => {
     fetchReviews();
@@ -145,7 +161,7 @@ export function ProductReviews({ productSlug }: ProductReviewsProps) {
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading reviews...</div>;
+    return <div className="text-center py-8">{content["reviews.loading"] || "Loading reviews..."}</div>;
   }
 
   return (
@@ -157,7 +173,7 @@ export function ProductReviews({ productSlug }: ProductReviewsProps) {
             <div className="text-4xl font-bold">{stats.averageRating.toFixed(1)}</div>
             <div className="mt-1">{renderStars(Math.round(stats.averageRating))}</div>
             <div className="mt-2 text-sm text-muted-foreground">
-              {stats.totalReviews} {stats.totalReviews === 1 ? "review" : "reviews"}
+              {stats.totalReviews} {stats.totalReviews === 1 ? (content["reviews.review"] || "review") : (content["reviews.reviews"] || "reviews")}
             </div>
           </div>
         </div>
@@ -166,29 +182,29 @@ export function ProductReviews({ productSlug }: ProductReviewsProps) {
       {/* Write Review Button */}
       {session ? (
         !showReviewForm ? (
-          <Button onClick={() => setShowReviewForm(true)}>Write a Review</Button>
+          <Button onClick={() => setShowReviewForm(true)}>{content["reviews.writeReview"] || "Write a Review"}</Button>
         ) : (
           <div className="border rounded-lg p-6 space-y-4">
-            <h3 className="font-semibold text-lg">Write Your Review</h3>
+            <h3 className="font-semibold text-lg">{content["reviews.writeYourReview"] || "Write Your Review"}</h3>
             <div>
-              <label className="block text-sm font-medium mb-2">Rating</label>
+              <label className="block text-sm font-medium mb-2">{content["reviews.rating.label"] || "Rating"}</label>
               {renderStars(rating, true)}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Comment (optional)</label>
+              <label className="block text-sm font-medium mb-2">{content["reviews.comment.label"] || "Comment (optional)"}</label>
               <Textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Share your experience with this product..."
+                placeholder={content["reviews.comment.placeholder"] || "Share your experience with this product..."}
                 rows={4}
               />
             </div>
             <div className="flex gap-2">
               <Button onClick={handleSubmitReview} disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Submit Review"}
+                {isSubmitting ? (content["reviews.submitting"] || "Submitting...") : (content["reviews.submit"] || "Submit Review")}
               </Button>
               <Button variant="outline" onClick={() => setShowReviewForm(false)}>
-                Cancel
+                {content["reviews.cancel"] || "Cancel"}
               </Button>
             </div>
           </div>
@@ -196,7 +212,7 @@ export function ProductReviews({ productSlug }: ProductReviewsProps) {
       ) : (
         <div className="border rounded-lg p-6 text-center">
           <p className="text-muted-foreground">
-            Please sign in to write a review
+            {content["reviews.signInRequired"] || "Please sign in to write a review"}
           </p>
         </div>
       )}
@@ -205,7 +221,7 @@ export function ProductReviews({ productSlug }: ProductReviewsProps) {
       <div className="space-y-6">
         {reviews.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            No reviews yet. Be the first to review this product!
+            {content["reviews.empty"] || "No reviews yet. Be the first to review this product!"}
           </div>
         ) : (
           reviews.map((review) => (
@@ -216,7 +232,7 @@ export function ProductReviews({ productSlug }: ProductReviewsProps) {
                     {renderStars(review.rating)}
                     {review.verified && (
                       <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                        Verified Purchase
+                        {content["reviews.verifiedPurchase"] || "Verified Purchase"}
                       </span>
                     )}
                   </div>
@@ -238,7 +254,7 @@ export function ProductReviews({ productSlug }: ProductReviewsProps) {
               <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
                 <button className="flex items-center gap-1 hover:text-foreground">
                   <ThumbsUp className="h-4 w-4" />
-                  Helpful ({review.helpful})
+                  {content["reviews.helpful"] || "Helpful ("}{review.helpful})
                 </button>
               </div>
             </div>

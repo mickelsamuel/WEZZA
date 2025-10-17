@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/currency";
 import Link from "next/link";
-import { Package, FolderOpen, BarChart3, Users, ShoppingCart, Image, Star } from "lucide-react";
+import { Package, FolderOpen, BarChart3, Users, ShoppingCart, Image, Star, FileText, UserCog } from "lucide-react";
 
 async function getDashboardStats() {
   const [
@@ -115,6 +115,20 @@ export default async function AdminDashboard() {
       href: "/admin/instagram",
       icon: Image,
       color: "bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500",
+    },
+    {
+      title: "Site Content",
+      description: "Edit all text content across the website",
+      href: "/admin/site-content",
+      icon: FileText,
+      color: "bg-indigo-500",
+    },
+    {
+      title: "User Management",
+      description: "Manage user accounts and roles",
+      href: "/admin/users",
+      icon: UserCog,
+      color: "bg-cyan-500",
     },
   ];
 

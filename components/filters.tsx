@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -39,9 +39,25 @@ export function Filters({
   onSortChange,
   onReset,
 }: FiltersProps) {
+  const [content, setContent] = useState<Record<string, string>>({});
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch("/api/site-content?section=filters")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   const toggleColor = (color: string) => {
     const newColors = selectedColors.includes(color)
@@ -78,15 +94,17 @@ export function Filters({
     <div className="space-y-6">
       {/* Sort */}
       <div>
-        <Label className="text-base font-semibold">Sort By</Label>
+        <Label className="text-base font-semibold">
+          {content["filters.sort.label"] || "Sort By"}
+        </Label>
         <Select onValueChange={(value) => onSortChange(value as SortOption)}>
           <SelectTrigger className="mt-2 w-full">
-            <SelectValue placeholder="Select sorting" />
+            <SelectValue placeholder={content["filters.sort.placeholder"] || "Select sorting"} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="newest">Newest</SelectItem>
-            <SelectItem value="price-low">Price: Low to High</SelectItem>
-            <SelectItem value="price-high">Price: High to Low</SelectItem>
+            <SelectItem value="newest">{content["filters.sort.newest"] || "Newest"}</SelectItem>
+            <SelectItem value="price-low">{content["filters.sort.priceLow"] || "Price: Low to High"}</SelectItem>
+            <SelectItem value="price-high">{content["filters.sort.priceHigh"] || "Price: High to Low"}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -95,7 +113,9 @@ export function Filters({
 
       {/* Colors */}
       <div>
-        <Label className="text-base font-semibold">Color</Label>
+        <Label className="text-base font-semibold">
+          {content["filters.color.label"] || "Color"}
+        </Label>
         <div className="mt-3 flex flex-wrap gap-3">
           {COLORS.map((color) => (
             <button
@@ -107,7 +127,7 @@ export function Filters({
                   : "border-gray-300 hover:scale-105"
               }`}
               style={{ backgroundColor: color.hex }}
-              title={color.label}
+              title={content[`filters.color.${color.value}`] || color.label}
             >
             </button>
           ))}
@@ -118,7 +138,9 @@ export function Filters({
 
       {/* Sizes */}
       <div>
-        <Label className="text-base font-semibold">Size</Label>
+        <Label className="text-base font-semibold">
+          {content["filters.size.label"] || "Size"}
+        </Label>
         <div className="mt-3 flex flex-wrap gap-2">
           {SIZES.map((size) => (
             <button
@@ -140,7 +162,9 @@ export function Filters({
 
       {/* Collections */}
       <div>
-        <Label className="text-base font-semibold">Collection</Label>
+        <Label className="text-base font-semibold">
+          {content["filters.collection.label"] || "Collection"}
+        </Label>
         <div className="mt-3 space-y-2">
           {COLLECTIONS.map((collection) => (
             <label key={collection} className="flex items-center gap-2">
@@ -159,7 +183,7 @@ export function Filters({
       <Separator />
 
       <Button variant="outline" className="w-full" onClick={handleReset}>
-        Reset Filters
+        {content["filters.reset"] || "Reset Filters"}
       </Button>
     </div>
   );

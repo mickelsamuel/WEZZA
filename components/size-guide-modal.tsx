@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,19 +22,36 @@ const HOODIE_SIZES = [
 ];
 
 export function SizeGuideModal() {
+  const [content, setContent] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/site-content?section=sizeGuide")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Ruler className="h-4 w-4" />
-          Size Guide
+          {content["sizeGuide.button"] || "Size Guide"}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Size Guide - Hoodies</DialogTitle>
+          <DialogTitle>{content["sizeGuide.title"] || "Size Guide - Hoodies"}</DialogTitle>
           <DialogDescription>
-            All measurements are in inches. If you're between sizes, we recommend sizing up for a more relaxed fit.
+            {content["sizeGuide.description"] || "All measurements are in inches. If you're between sizes, we recommend sizing up for a more relaxed fit."}
           </DialogDescription>
         </DialogHeader>
 
@@ -43,10 +61,10 @@ export function SizeGuideModal() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b">
-                  <th className="px-4 py-3 text-left font-semibold">Size</th>
-                  <th className="px-4 py-3 text-left font-semibold">Chest Width</th>
-                  <th className="px-4 py-3 text-left font-semibold">Length</th>
-                  <th className="px-4 py-3 text-left font-semibold">Sleeve Length</th>
+                  <th className="px-4 py-3 text-left font-semibold">{content["sizeGuide.table.size"] || "Size"}</th>
+                  <th className="px-4 py-3 text-left font-semibold">{content["sizeGuide.table.chest"] || "Chest Width"}</th>
+                  <th className="px-4 py-3 text-left font-semibold">{content["sizeGuide.table.length"] || "Length"}</th>
+                  <th className="px-4 py-3 text-left font-semibold">{content["sizeGuide.table.sleeve"] || "Sleeve Length"}</th>
                 </tr>
               </thead>
               <tbody>
@@ -64,24 +82,24 @@ export function SizeGuideModal() {
 
           {/* How to Measure Section */}
           <div className="space-y-4 rounded-lg bg-muted/50 p-4">
-            <h3 className="font-semibold">How to Measure</h3>
+            <h3 className="font-semibold">{content["sizeGuide.howToMeasure"] || "How to Measure"}</h3>
             <div className="grid gap-3 sm:grid-cols-3">
               <div>
-                <p className="font-medium text-sm">Chest Width</p>
+                <p className="font-medium text-sm">{content["sizeGuide.measure.chest.label"] || "Chest Width"}</p>
                 <p className="text-sm text-muted-foreground">
-                  Measure across the chest from armpit to armpit
+                  {content["sizeGuide.measure.chest.instruction"] || "Measure across the chest from armpit to armpit"}
                 </p>
               </div>
               <div>
-                <p className="font-medium text-sm">Length</p>
+                <p className="font-medium text-sm">{content["sizeGuide.measure.length.label"] || "Length"}</p>
                 <p className="text-sm text-muted-foreground">
-                  Measure from the highest point of the shoulder to the bottom hem
+                  {content["sizeGuide.measure.length.instruction"] || "Measure from the highest point of the shoulder to the bottom hem"}
                 </p>
               </div>
               <div>
-                <p className="font-medium text-sm">Sleeve Length</p>
+                <p className="font-medium text-sm">{content["sizeGuide.measure.sleeve.label"] || "Sleeve Length"}</p>
                 <p className="text-sm text-muted-foreground">
-                  Measure from the center back of the neck to the end of the sleeve
+                  {content["sizeGuide.measure.sleeve.instruction"] || "Measure from the center back of the neck to the end of the sleeve"}
                 </p>
               </div>
             </div>
@@ -89,20 +107,20 @@ export function SizeGuideModal() {
 
           {/* Fit Guide */}
           <div className="space-y-2">
-            <h3 className="font-semibold">Fit Guide</h3>
+            <h3 className="font-semibold">{content["sizeGuide.fitGuide"] || "Fit Guide"}</h3>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Our hoodies are designed for a relaxed, comfortable fit</li>
-              <li>Made from heavyweight 100% cotton (400 GSM)</li>
-              <li>Pre-shrunk fabric ensures consistent sizing after washing</li>
-              <li>For an oversized look, we recommend sizing up</li>
+              <li>{content["sizeGuide.fit.relaxed"] || "Our hoodies are designed with a slightly relaxed fit for maximum comfort"}</li>
+              <li>{content["sizeGuide.fit.preshrunk"] || "All garments are pre-shrunk to minimize further shrinkage"}</li>
+              <li>{content["sizeGuide.fit.between"] || "Between sizes? Size up for a more oversized look"}</li>
+              <li>{content["sizeGuide.fit.model"] || "Model is 6'0\" and wearing size Large"}</li>
             </ul>
           </div>
 
           {/* Contact Support */}
           <div className="text-center text-sm text-muted-foreground">
-            Still not sure? Contact us at{" "}
-            <a href="mailto:support@wezza.com" className="text-brand-orange hover:underline">
-              support@wezza.com
+            {content["sizeGuide.contact.text"] || "Still not sure? Contact us at"}{" "}
+            <a href={`mailto:${content["sizeGuide.contact.email"] || "support@wezza.com"}`} className="text-brand-orange hover:underline">
+              {content["sizeGuide.contact.email"] || "support@wezza.com"}
             </a>
           </div>
         </div>

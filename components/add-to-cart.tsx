@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Product } from "@/lib/types";
 import { useCartStore } from "@/store/cart";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,24 @@ interface AddToCartProps {
 export function AddToCart({ product }: AddToCartProps) {
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
+  const [content, setContent] = useState<Record<string, string>>({});
   const addItem = useCartStore((state) => state.addItem);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetch("/api/site-content?section=addToCart")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   // Get available stock for selected size
   const availableStock = selectedSize ? getSizeStock(product, selectedSize) : null;
@@ -27,8 +43,8 @@ export function AddToCart({ product }: AddToCartProps) {
   const handleAddToCart = () => {
     if (!selectedSize) {
       toast({
-        title: "Please select a size",
-        description: "Choose a size before adding to cart.",
+        title: content["addToCart.toast.selectSize.title"] || "Please select a size",
+        description: content["addToCart.toast.selectSize.description"] || "Choose a size before adding to cart.",
         variant: "destructive",
       });
       return;
@@ -37,8 +53,8 @@ export function AddToCart({ product }: AddToCartProps) {
     // Check if size is in stock
     if (!isSizeInStock(product, selectedSize)) {
       toast({
-        title: "Out of stock",
-        description: `${product.title} in size ${selectedSize} is currently unavailable.`,
+        title: content["addToCart.toast.outOfStock.title"] || "Out of stock",
+        description: `${product.title} ${content["addToCart.toast.outOfStock.inSize"] || "in size"} ${selectedSize} ${content["addToCart.toast.outOfStock.unavailable"] || "is currently unavailable"}.`,
         variant: "destructive",
       });
       return;
@@ -47,8 +63,8 @@ export function AddToCart({ product }: AddToCartProps) {
     // Check if quantity exceeds available stock
     if (availableStock !== null && quantity > availableStock) {
       toast({
-        title: "Insufficient stock",
-        description: `Only ${availableStock} items available in size ${selectedSize}.`,
+        title: content["addToCart.toast.insufficient.title"] || "Insufficient stock",
+        description: `${content["addToCart.toast.insufficient.only"] || "Only"} ${availableStock} ${content["addToCart.toast.insufficient.available"] || "items available in size"} ${selectedSize}.`,
         variant: "destructive",
       });
       return;
@@ -56,7 +72,7 @@ export function AddToCart({ product }: AddToCartProps) {
 
     addItem(product, selectedSize, quantity);
     toast({
-      title: "Added to cart",
+      title: content["addToCart.toast.added.title"] || "Added to cart",
       description: `${product.title} (${selectedSize}) x ${quantity}`,
     });
     setQuantity(1);
@@ -67,7 +83,7 @@ export function AddToCart({ product }: AddToCartProps) {
   return (
     <div className="space-y-6">
       <div>
-        <Label className="text-base font-semibold">Size</Label>
+        <Label className="text-base font-semibold">{content["addToCart.size.label"] || "Size"}</Label>
         <div className="mt-3 flex flex-wrap gap-2">
           {product.sizes.map((size) => {
             const sizeInStock = isSizeInStock(product, size);
@@ -99,7 +115,7 @@ export function AddToCart({ product }: AddToCartProps) {
       )}
 
       <div>
-        <Label className="text-base font-semibold">Quantity</Label>
+        <Label className="text-base font-semibold">{content["addToCart.quantity.label"] || "Quantity"}</Label>
         <div className="mt-3">
           <QuantitySelector
             quantity={quantity}
@@ -116,7 +132,7 @@ export function AddToCart({ product }: AddToCartProps) {
         disabled={!product.inStock || (!!selectedSize && !isSelectedSizeInStock)}
       >
         <ShoppingCart className="mr-2 h-5 w-5" />
-        {!product.inStock ? "Out of Stock" : (selectedSize && !isSelectedSizeInStock) ? "Size Out of Stock" : "Add to Cart"}
+        {!product.inStock ? (content["addToCart.outOfStock"] || "Out of Stock") : (selectedSize && !isSelectedSizeInStock) ? (content["addToCart.sizeOutOfStock"] || "Size Out of Stock") : (content["addToCart.addToCart"] || "Add to Cart")}
       </Button>
     </div>
   );

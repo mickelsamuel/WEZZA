@@ -21,12 +21,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
-  { href: "/custom", label: "Custom Orders" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
+// Navigation links will be fetched from content
+const getNavLinks = (content: Record<string, string>) => [
+  { href: "/", label: content["nav.home"] || "Home" },
+  { href: "/shop", label: content["nav.shop"] || "Shop" },
+  { href: "/custom", label: content["nav.custom"] || "Custom Orders" },
+  { href: "/about", label: content["nav.about"] || "About" },
+  { href: "/contact", label: content["nav.contact"] || "Contact" },
 ];
 
 export function Header() {
@@ -36,10 +37,24 @@ export function Header() {
   const [mounted, setMounted] = useState(false);
   const { isOpen: authModalOpen, openAuthModal, closeAuthModal } = useAuthModal();
   const { data: session, status } = useSession();
+  const [content, setContent] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setMounted(true);
+    // Fetch navigation content
+    fetch("/api/site-content?section=navigation")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch(console.error);
   }, []);
+
+  const NAV_LINKS = getNavLinks(content);
 
   return (
     <>
@@ -80,7 +95,7 @@ export function Header() {
             {status === "authenticated" ? (
               <div className="flex items-center gap-3">
                 <span className="hidden md:block text-sm font-medium">
-                  Hey, {session?.user?.name?.split(' ')[0] || "User"}!
+                  {content["user.greeting"] || "Hey"}, {session?.user?.name?.split(' ')[0] || "User"}!
                 </span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -98,18 +113,18 @@ export function Header() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link href="/account" className="cursor-pointer">
-                        My Account
+                        {content["user.myAccount"] || "My Account"}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/wishlist" className="cursor-pointer">
                         <Heart className="mr-2 h-4 w-4" />
-                        My Wishlist
+                        {content["user.myWishlist"] || "My Wishlist"}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/account#orders" className="cursor-pointer">
-                        Order History
+                        {content["user.orderHistory"] || "Order History"}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -118,7 +133,7 @@ export function Header() {
                       className="cursor-pointer text-red-600"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      Sign Out
+                      {content["user.signOut"] || "Sign Out"}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -131,7 +146,7 @@ export function Header() {
                   className="hidden md:flex"
                   onClick={openAuthModal}
                 >
-                  Sign In
+                  {content["nav.signin"] || "Sign In"}
                 </Button>
                 <Button
                   variant="ghost"

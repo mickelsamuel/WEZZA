@@ -17,10 +17,26 @@ export function SearchBar({ onOpenChange }: SearchBarProps) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [content, setContent] = useState<Record<string, string>>({});
   const debouncedQuery = useDebounce(query, 300);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch("/api/site-content?section=search")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   // Handle opening/closing modal
   useEffect(() => {
@@ -147,7 +163,7 @@ export function SearchBar({ onOpenChange }: SearchBarProps) {
                   <Input
                     ref={inputRef}
                     type="text"
-                    placeholder="Search hoodies, colors, collections..."
+                    placeholder={content["search.placeholder"] || "Search hoodies, colors, collections..."}
                     value={query}
                     onChange={(e) => {
                       setQuery(e.target.value);
@@ -182,7 +198,7 @@ export function SearchBar({ onOpenChange }: SearchBarProps) {
                     onClick={handleClose}
                     className="hidden md:flex"
                   >
-                    ESC
+                    {content["search.esc"] || "ESC"}
                   </Button>
                 </div>
 

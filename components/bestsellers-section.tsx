@@ -13,6 +13,22 @@ interface BestsellersSectionProps {
 export function BestsellersSection({ limit = 4 }: BestsellersSectionProps) {
   const [productsToShow, setProductsToShow] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/site-content?section=bestsellers")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   useEffect(() => {
     async function fetchBestsellers() {
@@ -67,17 +83,17 @@ export function BestsellersSection({ limit = 4 }: BestsellersSectionProps) {
         <div>
           <div className="flex items-center gap-2">
             <TrendingUp className="h-6 w-6 text-brand-orange" />
-            <h2 className="font-heading text-3xl font-bold md:text-4xl">Bestsellers</h2>
+            <h2 className="font-heading text-3xl font-bold md:text-4xl">{content["bestsellers.heading"] || "Bestsellers"}</h2>
           </div>
           <p className="mt-2 text-muted-foreground">
-            Our most popular hoodies, loved by the community
+            {content["bestsellers.description"] || "Our most popular hoodies, loved by the community"}
           </p>
         </div>
         <Link
           href="/shop"
           className="hidden items-center gap-1 text-brand-orange transition-colors hover:underline md:flex"
         >
-          Shop All
+          {content["bestsellers.shopAll"] || "Shop All"}
           <ChevronRight className="h-4 w-4" />
         </Link>
       </div>
@@ -95,7 +111,7 @@ export function BestsellersSection({ limit = 4 }: BestsellersSectionProps) {
           href="/shop"
           className="inline-flex items-center gap-1 text-brand-orange transition-colors hover:underline"
         >
-          Shop All Hoodies
+          {content["bestsellers.shopAllHoodies"] || "Shop All Hoodies"}
           <ChevronRight className="h-4 w-4" />
         </Link>
       </div>

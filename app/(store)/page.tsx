@@ -9,28 +9,33 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import ProductRecommendations from "@/components/product-recommendations";
 import { prisma } from "@/lib/prisma";
+import { getContentBySection } from "@/lib/site-content";
 
 export const dynamic = 'force-dynamic';
 
-const VALUE_PROPS = [
-  {
-    icon: Sparkles,
-    title: "Premium Cotton",
-    description: "350gsm heavyweight fabric that gets better with every wash",
-  },
-  {
-    icon: TrendingUp,
-    title: "Bold Fits",
-    description: "Modern silhouettes designed for everyday confidence",
-  },
-  {
-    icon: Shield,
-    title: "Clean Looks",
-    description: "Minimalist designs that never go out of style",
-  },
-];
-
 export default async function HomePage() {
+  // Get content
+  const content = await getContentBySection("home");
+
+  // Value props with dynamic content
+  const VALUE_PROPS = [
+    {
+      icon: Sparkles,
+      title: content["home.valueProps.cotton.title"] || "Premium Cotton",
+      description: content["home.valueProps.cotton.description"] || "350gsm heavyweight fabric that gets better with every wash",
+    },
+    {
+      icon: TrendingUp,
+      title: content["home.valueProps.fits.title"] || "Bold Fits",
+      description: content["home.valueProps.fits.description"] || "Modern silhouettes designed for everyday confidence",
+    },
+    {
+      icon: Shield,
+      title: content["home.valueProps.looks.title"] || "Clean Looks",
+      description: content["home.valueProps.looks.description"] || "Minimalist designs that never go out of style",
+    },
+  ];
+
   // Get featured products from database with error handling
   let featuredProducts: any[] = [];
   let dbError = false;
@@ -94,8 +99,8 @@ export default async function HomePage() {
           <div className="container mx-auto px-4">
             <ProductRecommendations
               products={personalizedProducts}
-              title="Picked Just For You"
-              description="Based on your browsing and purchase history"
+              title={content["home.recommendations.title"] || "Picked Just For You"}
+              description={content["home.recommendations.description"] || "Based on your browsing and purchase history"}
             />
           </div>
         </section>
@@ -105,8 +110,12 @@ export default async function HomePage() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="mb-12 text-center">
-            <h2 className="font-heading text-3xl font-bold md:text-4xl">Featured Hoodies</h2>
-            <p className="mt-2 text-muted-foreground">Our most popular styles</p>
+            <h2 className="font-heading text-3xl font-bold md:text-4xl">
+              {content["home.featured.title"] || "Featured Hoodies"}
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              {content["home.featured.description"] || "Our most popular styles"}
+            </p>
           </div>
           {dbError && (
             <div className="mb-8 rounded-lg bg-red-50 border border-red-200 p-4 text-center">
@@ -118,7 +127,7 @@ export default async function HomePage() {
           <ProductGrid products={featuredProducts} />
           <div className="mt-12 text-center">
             <Link href="/shop">
-              <Button size="lg">View All Products</Button>
+              <Button size="lg">{content["home.featured.viewAll"] || "View All Products"}</Button>
             </Link>
           </div>
         </div>
@@ -128,9 +137,11 @@ export default async function HomePage() {
       <section className="bg-brand-peach/20 py-16">
         <div className="container mx-auto px-4">
           <div className="mb-12 text-center">
-            <h2 className="font-heading text-3xl font-bold md:text-4xl">Made For Daily Wear</h2>
+            <h2 className="font-heading text-3xl font-bold md:text-4xl">
+              {content["home.valueProps.title"] || "Made For Daily Wear"}
+            </h2>
             <p className="mt-2 text-muted-foreground">
-              Every detail matters when you're building something to last
+              {content["home.valueProps.description"] || "Every detail matters when you're building something to last"}
             </p>
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">

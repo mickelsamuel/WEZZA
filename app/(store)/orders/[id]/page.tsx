@@ -41,11 +41,11 @@ interface Order {
   }>;
 }
 
-const statusSteps = [
-  { key: "pending", label: "Order Placed", icon: "📦" },
-  { key: "processing", label: "Processing", icon: "⚙️" },
-  { key: "shipped", label: "Shipped", icon: "🚚" },
-  { key: "delivered", label: "Delivered", icon: "✅" },
+const getStatusSteps = (content: Record<string, string>) => [
+  { key: "pending", label: content["orders.status.pending"] || "Order Placed", icon: "📦" },
+  { key: "processing", label: content["orders.status.processing"] || "Processing", icon: "⚙️" },
+  { key: "shipped", label: content["orders.status.shipped"] || "Shipped", icon: "🚚" },
+  { key: "delivered", label: content["orders.status.delivered"] || "Delivered", icon: "✅" },
 ];
 
 const statusColors = {
@@ -65,6 +65,22 @@ export default function OrderTrackingPage({
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [content, setContent] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/site-content?section=orders")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   useEffect(() => {
     fetchOrder();
@@ -86,6 +102,8 @@ export default function OrderTrackingPage({
     }
   };
 
+  const statusSteps = getStatusSteps(content);
+
   const getCurrentStepIndex = () => {
     if (!order) return 0;
     return statusSteps.findIndex((step) => step.key === order.status);
@@ -106,13 +124,13 @@ export default function OrderTrackingPage({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Order Not Found</h1>
+          <h1 className="text-2xl font-bold mb-2">{content["orders.notFound.title"] || "Order Not Found"}</h1>
           <p className="text-gray-600 mb-6">{error}</p>
           <Link
             href="/account"
             className="text-brand-orange hover:underline"
           >
-            View all orders
+            {content["orders.notFound.viewAll"] || "View all orders"}
           </Link>
         </div>
       </div>
@@ -130,12 +148,12 @@ export default function OrderTrackingPage({
             href="/account"
             className="text-brand-orange hover:underline mb-4 inline-block"
           >
-            ← Back to Account
+            {content["orders.backToAccount"] || "← Back to Account"}
           </Link>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">Track Your Order</h1>
-              <p className="text-gray-600 mt-1">Order #{order.id.slice(0, 8)}</p>
+              <h1 className="text-3xl font-bold">{content["orders.pageTitle"] || "Track Your Order"}</h1>
+              <p className="text-gray-600 mt-1">{content["orders.orderNumber"] || "Order"} #{order.id.slice(0, 8)}</p>
             </div>
             <Badge
               variant={
@@ -152,7 +170,7 @@ export default function OrderTrackingPage({
         {order.status !== "cancelled" && (
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Order Progress</CardTitle>
+              <CardTitle>{content["orders.progress.title"] || "Order Progress"}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="relative">
@@ -204,16 +222,16 @@ export default function OrderTrackingPage({
         {order.trackingNumber && (
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Tracking Information</CardTitle>
+              <CardTitle>{content["orders.tracking.title"] || "Tracking Information"}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Carrier:</span>
+                  <span className="text-gray-600">{content["orders.tracking.carrier"] || "Carrier"}:</span>
                   <span className="font-medium">{order.carrier}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Tracking Number:</span>
+                  <span className="text-gray-600">{content["orders.tracking.number"] || "Tracking Number"}:</span>
                   <span className="font-mono font-medium">
                     {order.trackingNumber}
                   </span>
@@ -228,7 +246,7 @@ export default function OrderTrackingPage({
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle>Order Items</CardTitle>
+                <CardTitle>{content["orders.items.title"] || "Order Items"}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -243,7 +261,7 @@ export default function OrderTrackingPage({
                             {item.title}
                           </Link>
                           <p className="text-sm text-gray-600">
-                            Size: {item.size} • Quantity: {item.quantity}
+                            {content["orders.items.size"] || "Size"}: {item.size} • {content["orders.items.quantity"] || "Quantity"}: {item.quantity}
                           </p>
                         </div>
                         <p className="font-semibold">
@@ -259,7 +277,7 @@ export default function OrderTrackingPage({
                   <Separator className="my-4" />
 
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-lg">Total</span>
+                    <span className="font-bold text-lg">{content["orders.items.total"] || "Total"}</span>
                     <span className="font-bold text-lg">
                       {formatPrice(order.total, order.currency)}
                     </span>
@@ -274,7 +292,7 @@ export default function OrderTrackingPage({
             {/* Shipping Address */}
             <Card>
               <CardHeader>
-                <CardTitle>Shipping Address</CardTitle>
+                <CardTitle>{content["orders.shipping.title"] || "Shipping Address"}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-sm space-y-1">
@@ -295,15 +313,15 @@ export default function OrderTrackingPage({
             {/* Order Details */}
             <Card>
               <CardHeader>
-                <CardTitle>Order Details</CardTitle>
+                <CardTitle>{content["orders.details.title"] || "Order Details"}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Order Date:</span>
+                  <span className="text-gray-600">{content["orders.details.date"] || "Order Date"}:</span>
                   <span>{new Date(order.createdAt).toLocaleDateString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Order ID:</span>
+                  <span className="text-gray-600">{content["orders.details.id"] || "Order ID"}:</span>
                   <span className="font-mono">{order.id.slice(0, 12)}...</span>
                 </div>
               </CardContent>
@@ -312,7 +330,7 @@ export default function OrderTrackingPage({
             {/* Status Updates */}
             <Card>
               <CardHeader>
-                <CardTitle>Status Updates</CardTitle>
+                <CardTitle>{content["orders.statusUpdates.title"] || "Status Updates"}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -339,12 +357,12 @@ export default function OrderTrackingPage({
         <Card className="mt-6">
           <CardContent className="py-6">
             <div className="text-center">
-              <p className="text-gray-600 mb-2">Need help with your order?</p>
+              <p className="text-gray-600 mb-2">{content["orders.help.question"] || "Need help with your order?"}</p>
               <Link
                 href="/contact"
                 className="text-brand-orange hover:underline font-medium"
               >
-                Contact Support
+                {content["orders.help.contact"] || "Contact Support"}
               </Link>
             </div>
           </CardContent>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const dynamic = "force-dynamic";
 import Image from "next/image";
@@ -15,12 +15,28 @@ import { Trash2, ShoppingBag } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function CartPage() {
+  const [content, setContent] = useState<Record<string, string>>({});
   const items = useCartStore((state) => state.items);
   const removeItem = useCartStore((state) => state.removeItem);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const getTotal = useCartStore((state) => state.getTotal());
   const { toast } = useToast();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/site-content?section=cart")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   const handleCheckout = async () => {
     setIsCheckingOut(true);
@@ -48,8 +64,8 @@ export default function CartPage() {
       }
     } catch (error) {
       toast({
-        title: "Checkout Error",
-        description: error instanceof Error ? error.message : "An error occurred",
+        title: content["cart.error.title"] || "Checkout Error",
+        description: error instanceof Error ? error.message : (content["cart.error.description"] || "An error occurred"),
         variant: "destructive",
       });
       setIsCheckingOut(false);
@@ -60,13 +76,15 @@ export default function CartPage() {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <ShoppingBag className="mx-auto h-24 w-24 text-muted-foreground" />
-        <h1 className="mt-6 font-heading text-3xl font-bold">Your cart is empty</h1>
+        <h1 className="mt-6 font-heading text-3xl font-bold">
+          {content["cart.empty.title"] || "Your cart is empty"}
+        </h1>
         <p className="mt-2 text-muted-foreground">
-          Add some hoodies to get started
+          {content["cart.empty.description"] || "Add some hoodies to get started"}
         </p>
         <Link href="/shop">
           <Button size="lg" className="mt-8">
-            Shop Now
+            {content["cart.empty.button"] || "Shop Now"}
           </Button>
         </Link>
       </div>
@@ -75,7 +93,9 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="mb-8 font-heading text-4xl font-bold md:text-5xl">Shopping Cart</h1>
+      <h1 className="mb-8 font-heading text-4xl font-bold md:text-5xl">
+        {content["cart.pageTitle"] || "Shopping Cart"}
+      </h1>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Cart Items */}
@@ -104,7 +124,7 @@ export default function CartPage() {
                       </h3>
                     </Link>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Size: {item.size} • {item.product.collection}
+                      {content["cart.item.size"] || "Size"}: {item.size} • {item.product.collection}
                     </p>
                     <Price
                       price={item.product.price}
@@ -137,19 +157,27 @@ export default function CartPage() {
         {/* Order Summary */}
         <div className="lg:col-span-1">
           <Card className="sticky top-24 p-6">
-            <h2 className="font-heading text-2xl font-bold">Order Summary</h2>
+            <h2 className="font-heading text-2xl font-bold">
+              {content["cart.summary.title"] || "Order Summary"}
+            </h2>
 
             <Separator className="my-4" />
 
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
+                <span className="text-muted-foreground">
+                  {content["cart.summary.subtotal"] || "Subtotal"}
+                </span>
                 <Price price={getTotal} />
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Shipping</span>
+                <span className="text-muted-foreground">
+                  {content["cart.summary.shipping"] || "Shipping"}
+                </span>
                 <span className="text-sm">
-                  {getTotal >= 10000 ? "FREE" : "Calculated at checkout"}
+                  {getTotal >= 10000
+                    ? (content["cart.summary.shipping.free"] || "FREE")
+                    : (content["cart.summary.shipping.calculated"] || "Calculated at checkout")}
                 </span>
               </div>
             </div>
@@ -157,13 +185,13 @@ export default function CartPage() {
             <Separator className="my-4" />
 
             <div className="flex justify-between text-lg font-bold">
-              <span>Total</span>
+              <span>{content["cart.summary.total"] || "Total"}</span>
               <Price price={getTotal} />
             </div>
 
             {getTotal < 10000 && (
               <p className="mt-4 text-center text-sm text-muted-foreground">
-                Add <Price price={10000 - getTotal} /> more for free shipping
+                {content["cart.summary.freeShippingMessage"] || "Add"} <Price price={10000 - getTotal} /> {content["cart.summary.freeShippingMessage2"] || "more for free shipping"}
               </p>
             )}
 
@@ -173,11 +201,13 @@ export default function CartPage() {
               onClick={handleCheckout}
               disabled={isCheckingOut}
             >
-              {isCheckingOut ? "Processing..." : "Proceed to Checkout"}
+              {isCheckingOut
+                ? (content["cart.checkout.processing"] || "Processing...")
+                : (content["cart.checkout.button"] || "Proceed to Checkout")}
             </Button>
 
             <p className="mt-4 text-center text-xs text-muted-foreground">
-              Secure checkout powered by Stripe
+              {content["cart.checkout.secure"] || "Secure checkout powered by Stripe"}
             </p>
           </Card>
         </div>

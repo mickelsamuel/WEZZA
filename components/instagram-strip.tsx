@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
+import { getContentBySection } from "@/lib/site-content";
 
 // Default fallback images if none are set in admin
 const DEFAULT_IMAGES = [
@@ -43,13 +44,18 @@ async function getInstagramImages() {
 
 export async function InstagramStrip() {
   const images = await getInstagramImages();
+  const content = await getContentBySection("home");
 
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
         <div className="text-center">
-          <h2 className="font-heading text-3xl font-bold md:text-4xl">Follow @WEZZA</h2>
-          <p className="mt-2 text-muted-foreground">See how our community styles their hoodies</p>
+          <h2 className="font-heading text-3xl font-bold md:text-4xl">
+            {content["home.instagram.title"] || "Follow @WEZZA"}
+          </h2>
+          <p className="mt-2 text-muted-foreground">
+            {content["home.instagram.description"] || "See how our community styles their hoodies"}
+          </p>
         </div>
         <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
           {images.map((image) => (

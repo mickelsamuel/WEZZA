@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Product } from '@/lib/types';
 import { useCartStore } from '@/store/cart';
 import { Button } from '@/components/ui/button';
@@ -26,12 +26,28 @@ export function AddToCartEnhanced({ product }: AddToCartEnhancedProps) {
   const [sizeModalOpen, setSizeModalOpen] = useState(false);
   const [stockModalOpen, setStockModalOpen] = useState(false);
   const [buyNowLoading, setBuyNowLoading] = useState(false);
+  const [content, setContent] = useState<Record<string, string>>({});
 
   const addItem = useCartStore((state) => state.addItem);
   const { toast } = useToast();
   const { data: session } = useSession();
   const router = useRouter();
   const { openAuthModal } = useAuthModal();
+
+  useEffect(() => {
+    fetch('/api/site-content?section=addToCart')
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error('Error fetching content:', error);
+      });
+  }, []);
 
   // Get available stock for selected size
   const availableStock = selectedSize ? getSizeStock(product, selectedSize) : null;
@@ -179,7 +195,7 @@ export function AddToCartEnhanced({ product }: AddToCartEnhancedProps) {
       <div className="space-y-6">
         <div>
           <div className="flex items-center justify-between mb-3">
-            <Label className="text-base font-semibold">Size</Label>
+            <Label className="text-base font-semibold">{content['addToCart.size.label'] || 'Size'}</Label>
             <Button
               variant="link"
               size="sm"
@@ -187,7 +203,7 @@ export function AddToCartEnhanced({ product }: AddToCartEnhancedProps) {
               className="text-brand-orange hover:text-brand-orange/80 h-auto p-0"
             >
               <Ruler className="w-4 h-4 mr-1" />
-              Find My Size
+              {content['addToCart.findMySize'] || 'Find My Size'}
             </Button>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -225,7 +241,7 @@ export function AddToCartEnhanced({ product }: AddToCartEnhancedProps) {
                 className="mt-2 w-full border-brand-orange text-brand-orange hover:bg-brand-orange hover:text-white"
               >
                 <Bell className="w-4 h-4 mr-2" />
-                Notify Me When Available
+                {content['addToCart.notifyWhenAvailable'] || 'Notify Me When Available'}
               </Button>
             )}
           </div>
@@ -234,15 +250,15 @@ export function AddToCartEnhanced({ product }: AddToCartEnhancedProps) {
         {/* Show waitlist button if viewing out of stock size */}
         {isAnyOutOfStock && !selectedSize && (
           <div className="bg-brand-orange/5 border border-brand-orange/20 rounded-lg p-4">
-            <p className="text-sm font-medium mb-2">Some sizes are out of stock</p>
+            <p className="text-sm font-medium mb-2">{content['addToCart.someSizesOutOfStock'] || 'Some sizes are out of stock'}</p>
             <p className="text-xs text-gray-600 mb-3">
-              Select an out-of-stock size to join the waitlist and get notified when it's back
+              {content['addToCart.waitlistInfo'] || "Select an out-of-stock size to join the waitlist and get notified when it's back"}
             </p>
           </div>
         )}
 
         <div>
-          <Label className="text-base font-semibold">Quantity</Label>
+          <Label className="text-base font-semibold">{content['addToCart.quantity.label'] || 'Quantity'}</Label>
           <div className="mt-3">
             <QuantitySelector
               quantity={quantity}
@@ -264,12 +280,12 @@ export function AddToCartEnhanced({ product }: AddToCartEnhancedProps) {
             {buyNowLoading ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Processing...
+                {content['addToCart.processing'] || 'Processing...'}
               </>
             ) : (
               <>
                 <Zap className="mr-2 h-5 w-5 fill-current" />
-                Buy Now - Fast Checkout
+                {content['addToCart.buyNow'] || 'Buy Now - Fast Checkout'}
               </>
             )}
           </Button>
@@ -284,17 +300,17 @@ export function AddToCartEnhanced({ product }: AddToCartEnhancedProps) {
           >
             <ShoppingCart className="mr-2 h-5 w-5" />
             {!product.inStock
-              ? 'Out of Stock'
+              ? (content['addToCart.outOfStock'] || 'Out of Stock')
               : selectedSize && !isSelectedSizeInStock
-              ? 'Size Out of Stock'
-              : 'Add to Cart'}
+              ? (content['addToCart.sizeOutOfStock'] || 'Size Out of Stock')
+              : (content['addToCart.addToCart'] || 'Add to Cart')}
           </Button>
         </div>
 
         {session && (
           <p className="text-xs text-center text-gray-500">
             <Zap className="w-3 h-3 inline mr-1" />
-            Buy Now uses your saved address and payment method for instant checkout
+            {content['addToCart.buyNowHelp'] || 'Buy Now uses your saved address and payment method for instant checkout'}
           </p>
         )}
       </div>

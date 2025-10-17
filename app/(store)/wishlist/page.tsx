@@ -28,7 +28,23 @@ export default function WishlistPage() {
   const router = useRouter();
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [content, setContent] = useState<Record<string, string>>({});
   const addItem = useCartStore((state) => state.addItem);
+
+  useEffect(() => {
+    fetch("/api/site-content?section=wishlist")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -50,7 +66,7 @@ export default function WishlistPage() {
       }
     } catch (error) {
       console.error("Failed to fetch wishlist:", error);
-      toast.error("Failed to load wishlist");
+      toast.error(content["wishlist.toast.failed"] || "Failed to load wishlist");
     } finally {
       setIsLoading(false);
     }
@@ -64,16 +80,16 @@ export default function WishlistPage() {
 
       if (response.ok) {
         setWishlist(wishlist.filter((item) => item.productSlug !== productSlug));
-        toast.success("Removed from wishlist");
+        toast.success(content["wishlist.toast.removed"] || "Removed from wishlist");
       }
     } catch (error) {
-      toast.error("Failed to remove item");
+      toast.error(content["wishlist.toast.removeFailed"] || "Failed to remove item");
     }
   };
 
   const handleAddToCart = (item: WishlistItem) => {
     if (!item.product.inStock) {
-      toast.error("This item is currently out of stock");
+      toast.error(content["wishlist.toast.outOfStock"] || "This item is currently out of stock");
       return;
     }
 
@@ -100,13 +116,13 @@ export default function WishlistPage() {
       defaultSize,
       1
     );
-    toast.success("Added to cart");
+    toast.success(content["wishlist.toast.added"] || "Added to cart");
   };
 
   if (status === "loading" || isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-brand-black via-brand-black to-brand-orange flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="text-white text-xl">{content["wishlist.loading"] || "Loading..."}</div>
       </div>
     );
   }
@@ -121,7 +137,7 @@ export default function WishlistPage() {
         {/* Back to Store */}
         <Link href="/" className="inline-flex items-center text-white/70 hover:text-white transition-colors mb-8">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Store
+          {content["wishlist.backToStore"] || "Back to Store"}
         </Link>
 
         {/* Header */}
@@ -129,11 +145,13 @@ export default function WishlistPage() {
           <div className="flex items-center gap-4 mb-4">
             <Heart className="h-12 w-12 text-brand-orange fill-brand-orange" />
             <h1 className="font-heading text-5xl md:text-6xl font-bold text-white">
-              MY WISHLIST
+              {content["wishlist.heading"] || "MY WISHLIST"}
             </h1>
           </div>
           <p className="text-lg text-white/70">
-            {wishlist.length} {wishlist.length === 1 ? "item" : "items"} saved for later
+            {wishlist.length} {wishlist.length === 1
+              ? (content["wishlist.item"] || "item")
+              : (content["wishlist.items"] || "items")} {content["wishlist.savedFor"] || "saved for later"}
           </p>
         </div>
 
@@ -141,13 +159,15 @@ export default function WishlistPage() {
         {wishlist.length === 0 ? (
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 p-12 text-center">
             <Heart className="h-24 w-24 text-white/30 mx-auto mb-6" />
-            <h2 className="text-2xl font-bold text-white mb-4">Your wishlist is empty</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              {content["wishlist.empty.title"] || "Your wishlist is empty"}
+            </h2>
             <p className="text-white/70 mb-8">
-              Start adding items you love to your wishlist!
+              {content["wishlist.empty.description"] || "Start adding items you love to your wishlist!"}
             </p>
             <Link href="/shop">
               <Button size="lg" className="bg-brand-orange hover:bg-brand-orange/90">
-                Browse Products
+                {content["wishlist.empty.button"] || "Browse Products"}
               </Button>
             </Link>
           </div>
@@ -168,7 +188,9 @@ export default function WishlistPage() {
                     />
                     {!item.product.inStock && (
                       <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">OUT OF STOCK</span>
+                        <span className="text-white font-bold text-lg">
+                          {content["wishlist.outOfStock"] || "OUT OF STOCK"}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -189,7 +211,7 @@ export default function WishlistPage() {
                       className="flex-1 bg-brand-orange hover:bg-brand-orange/90"
                     >
                       <ShoppingCart className="h-4 w-4 mr-2" />
-                      Add to Cart
+                      {content["wishlist.addToCart"] || "Add to Cart"}
                     </Button>
                     <Button
                       variant="outline"

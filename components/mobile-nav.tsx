@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { X, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 
 interface MobileNavProps {
@@ -17,6 +17,22 @@ interface MobileNavProps {
 export function MobileNav({ isOpen, onClose, links, onAuthModalOpen }: MobileNavProps) {
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const [content, setContent] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/site-content?section=mobileNav")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -36,7 +52,9 @@ export function MobileNav({ isOpen, onClose, links, onAuthModalOpen }: MobileNav
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
       <div className="fixed right-0 top-0 h-full w-3/4 max-w-sm bg-background p-6 shadow-lg">
         <div className="flex items-center justify-between">
-          <h2 className="font-heading text-2xl font-bold">Menu</h2>
+          <h2 className="font-heading text-2xl font-bold">
+            {content["mobileNav.menu"] || "Menu"}
+          </h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
           </Button>
@@ -70,7 +88,7 @@ export function MobileNav({ isOpen, onClose, links, onAuthModalOpen }: MobileNav
                   onClick={onClose}
                   className="rounded-md px-4 py-3 font-medium hover:bg-brand-gray transition-colors"
                 >
-                  My Account
+                  {content["mobileNav.myAccount"] || "My Account"}
                 </Link>
                 <Button
                   variant="ghost"
@@ -81,7 +99,7 @@ export function MobileNav({ isOpen, onClose, links, onAuthModalOpen }: MobileNav
                   className="justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
+                  {content["mobileNav.signOut"] || "Sign Out"}
                 </Button>
               </div>
             ) : (
@@ -93,7 +111,7 @@ export function MobileNav({ isOpen, onClose, links, onAuthModalOpen }: MobileNav
                 className="w-full bg-brand-orange hover:bg-brand-orange/90"
               >
                 <User className="mr-2 h-5 w-5" />
-                Sign In
+                {content["mobileNav.signIn"] || "Sign In"}
               </Button>
             )}
           </div>

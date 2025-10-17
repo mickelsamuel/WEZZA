@@ -30,6 +30,7 @@ export default function AccountPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [content, setContent] = useState<Record<string, string>>({});
   const [addressForm, setAddressForm] = useState({
     name: "",
     street: "",
@@ -39,6 +40,21 @@ export default function AccountPage() {
     country: "Canada",
     isDefault: false,
   });
+
+  useEffect(() => {
+    fetch("/api/site-content?section=account")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -96,7 +112,7 @@ export default function AccountPage() {
         throw new Error("Failed to save address");
       }
 
-      toast.success(editingAddress ? "Address updated!" : "Address added!");
+      toast.success(editingAddress ? (content["account.addresses.updated"] || "Address updated!") : (content["account.addresses.added"] || "Address added!"));
       setShowAddressForm(false);
       setEditingAddress(null);
       setAddressForm({
@@ -110,12 +126,12 @@ export default function AccountPage() {
       });
       fetchAddresses();
     } catch (error) {
-      toast.error("Failed to save address");
+      toast.error(content["account.addresses.error"] || "Failed to save address");
     }
   };
 
   const handleDeleteAddress = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this address?")) {
+    if (!confirm(content["account.addresses.deleteConfirm"] || "Are you sure you want to delete this address?")) {
       return;
     }
 
@@ -128,10 +144,10 @@ export default function AccountPage() {
         throw new Error("Failed to delete address");
       }
 
-      toast.success("Address deleted!");
+      toast.success(content["account.addresses.deleted"] || "Address deleted!");
       fetchAddresses();
     } catch (error) {
-      toast.error("Failed to delete address");
+      toast.error(content["account.addresses.deleteError"] || "Failed to delete address");
     }
   };
 
@@ -152,7 +168,7 @@ export default function AccountPage() {
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-black via-brand-black to-brand-orange">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="text-white text-xl">{content["account.loading"] || "Loading..."}</div>
       </div>
     );
   }
@@ -167,7 +183,7 @@ export default function AccountPage() {
         {/* Back to Store */}
         <Link href="/" className="inline-flex items-center text-white/70 hover:text-white transition-colors mb-8">
           <ArrowRight className="mr-2 h-4 w-4 rotate-180" />
-          Back to Store
+          {content["account.backToStore"] || "Back to Store"}
         </Link>
 
         {/* Header */}
@@ -175,10 +191,10 @@ export default function AccountPage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
               <h1 className="font-heading text-5xl md:text-6xl font-bold text-white mb-2">
-                MY ACCOUNT
+                {content["account.heading"] || "MY ACCOUNT"}
               </h1>
               <p className="text-lg text-white/70">
-                Welcome back, {session.user?.name || session.user?.email?.split("@")[0]}
+                {content["account.welcome"] || "Welcome back"}, {session.user?.name || session.user?.email?.split("@")[0]}
               </p>
             </div>
             <Button
@@ -188,7 +204,7 @@ export default function AccountPage() {
               className="border-2 border-white/30 bg-white/10 backdrop-blur-lg text-white hover:bg-red-500 hover:border-red-500 hover:text-white transition-all"
             >
               <LogOut className="mr-2 h-5 w-5" />
-              Sign Out
+              {content["account.signOut"] || "Sign Out"}
             </Button>
           </div>
         </div>
@@ -201,7 +217,7 @@ export default function AccountPage() {
                 <Package className="h-8 w-8 text-brand-orange" />
               </div>
               <div>
-                <p className="text-white/60 text-sm font-medium">Total Orders</p>
+                <p className="text-white/60 text-sm font-medium">{content["account.stats.orders"] || "Total Orders"}</p>
                 <p className="text-3xl font-bold text-white">{orders.length}</p>
               </div>
             </div>
@@ -213,7 +229,7 @@ export default function AccountPage() {
                 <MapPin className="h-8 w-8 text-blue-400" />
               </div>
               <div>
-                <p className="text-white/60 text-sm font-medium">Saved Addresses</p>
+                <p className="text-white/60 text-sm font-medium">{content["account.stats.addresses"] || "Saved Addresses"}</p>
                 <p className="text-3xl font-bold text-white">{addresses.length}</p>
               </div>
             </div>
@@ -225,8 +241,8 @@ export default function AccountPage() {
                 <ShoppingBag className="h-8 w-8 text-green-400" />
               </div>
               <div>
-                <p className="text-white/60 text-sm font-medium">Account Status</p>
-                <p className="text-2xl font-bold text-green-400">Active</p>
+                <p className="text-white/60 text-sm font-medium">{content["account.stats.status"] || "Account Status"}</p>
+                <p className="text-2xl font-bold text-green-400">{content["account.stats.active"] || "Active"}</p>
               </div>
             </div>
           </div>
@@ -236,16 +252,16 @@ export default function AccountPage() {
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 p-8 mb-8">
           <div className="flex items-center gap-3 mb-6">
             <User className="h-6 w-6 text-brand-orange" />
-            <h2 className="text-2xl font-bold text-white">Account Details</h2>
+            <h2 className="text-2xl font-bold text-white">{content["account.details.heading"] || "Account Details"}</h2>
           </div>
           <div className="space-y-4">
             <div>
-              <p className="text-white/60 text-sm mb-1">Email</p>
+              <p className="text-white/60 text-sm mb-1">{content["account.details.email"] || "Email"}</p>
               <p className="text-white text-lg">{session.user?.email}</p>
             </div>
             {session.user?.name && (
               <div>
-                <p className="text-white/60 text-sm mb-1">Name</p>
+                <p className="text-white/60 text-sm mb-1">{content["account.details.name"] || "Name"}</p>
                 <p className="text-white text-lg">{session.user.name}</p>
               </div>
             )}
@@ -257,7 +273,7 @@ export default function AccountPage() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <MapPin className="h-6 w-6 text-brand-orange" />
-              <h2 className="text-2xl font-bold text-white">Saved Addresses</h2>
+              <h2 className="text-2xl font-bold text-white">{content["account.addresses.heading"] || "Saved Addresses"}</h2>
             </div>
             <Button
               onClick={() => {
@@ -276,68 +292,68 @@ export default function AccountPage() {
               className="bg-brand-orange hover:bg-brand-orange/90"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Address
+              {content["account.addresses.add"] || "Add Address"}
             </Button>
           </div>
 
           {showAddressForm && (
             <form onSubmit={handleSaveAddress} className="bg-white/5 rounded-xl p-6 mb-6 border border-white/10">
               <h3 className="text-lg font-semibold text-white mb-4">
-                {editingAddress ? "Edit Address" : "New Address"}
+                {editingAddress ? (content["account.addresses.edit"] || "Edit Address") : (content["account.addresses.new"] || "New Address")}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-white">Address Name *</Label>
+                  <Label className="text-white">{content["account.addresses.name.label"] || "Address Name *"}</Label>
                   <Input
                     value={addressForm.name}
                     onChange={(e) => setAddressForm({ ...addressForm, name: e.target.value })}
-                    placeholder="e.g., Home, Work"
+                    placeholder={content["account.addresses.name.placeholder"] || "e.g., Home, Work"}
                     required
                     className="bg-white/10 border-white/20 text-white"
                   />
                 </div>
                 <div>
-                  <Label className="text-white">Street Address *</Label>
+                  <Label className="text-white">{content["account.addresses.street.label"] || "Street Address *"}</Label>
                   <Input
                     value={addressForm.street}
                     onChange={(e) => setAddressForm({ ...addressForm, street: e.target.value })}
-                    placeholder="123 Main St"
+                    placeholder={content["account.addresses.street.placeholder"] || "123 Main St"}
                     required
                     className="bg-white/10 border-white/20 text-white"
                   />
                 </div>
                 <div>
-                  <Label className="text-white">City *</Label>
+                  <Label className="text-white">{content["account.addresses.city.label"] || "City *"}</Label>
                   <Input
                     value={addressForm.city}
                     onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
-                    placeholder="Toronto"
+                    placeholder={content["account.addresses.city.placeholder"] || "Toronto"}
                     required
                     className="bg-white/10 border-white/20 text-white"
                   />
                 </div>
                 <div>
-                  <Label className="text-white">Province *</Label>
+                  <Label className="text-white">{content["account.addresses.province.label"] || "Province *"}</Label>
                   <Input
                     value={addressForm.province}
                     onChange={(e) => setAddressForm({ ...addressForm, province: e.target.value })}
-                    placeholder="ON"
+                    placeholder={content["account.addresses.province.placeholder"] || "ON"}
                     required
                     className="bg-white/10 border-white/20 text-white"
                   />
                 </div>
                 <div>
-                  <Label className="text-white">Postal Code *</Label>
+                  <Label className="text-white">{content["account.addresses.postal.label"] || "Postal Code *"}</Label>
                   <Input
                     value={addressForm.postalCode}
                     onChange={(e) => setAddressForm({ ...addressForm, postalCode: e.target.value })}
-                    placeholder="A1A 1A1"
+                    placeholder={content["account.addresses.postal.placeholder"] || "A1A 1A1"}
                     required
                     className="bg-white/10 border-white/20 text-white"
                   />
                 </div>
                 <div>
-                  <Label className="text-white">Country *</Label>
+                  <Label className="text-white">{content["account.addresses.country.label"] || "Country *"}</Label>
                   <Input
                     value={addressForm.country}
                     onChange={(e) => setAddressForm({ ...addressForm, country: e.target.value })}
@@ -354,11 +370,11 @@ export default function AccountPage() {
                   onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
                   className="h-4 w-4"
                 />
-                <Label htmlFor="isDefault" className="text-white">Set as default address</Label>
+                <Label htmlFor="isDefault" className="text-white">{content["account.addresses.default"] || "Set as default address"}</Label>
               </div>
               <div className="flex gap-4 mt-6">
                 <Button type="submit" className="bg-brand-orange hover:bg-brand-orange/90">
-                  {editingAddress ? "Update Address" : "Save Address"}
+                  {editingAddress ? (content["account.addresses.update"] || "Update Address") : (content["account.addresses.save"] || "Save Address")}
                 </Button>
                 <Button
                   type="button"
@@ -369,7 +385,7 @@ export default function AccountPage() {
                   }}
                   className="border-white/20 text-white hover:bg-white/10"
                 >
-                  Cancel
+                  {content["account.addresses.cancel"] || "Cancel"}
                 </Button>
               </div>
             </form>
@@ -378,7 +394,7 @@ export default function AccountPage() {
           {addresses.length === 0 ? (
             <div className="text-center py-12">
               <MapPin className="h-16 w-16 text-white/30 mx-auto mb-4" />
-              <p className="text-white/60 mb-6">No saved addresses yet</p>
+              <p className="text-white/60 mb-6">{content["account.addresses.empty"] || "No saved addresses yet"}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -389,7 +405,7 @@ export default function AccountPage() {
                 >
                   {address.isDefault && (
                     <span className="absolute top-4 right-4 bg-brand-orange text-white text-xs px-2 py-1 rounded">
-                      Default
+                      {content["account.addresses.defaultBadge"] || "Default"}
                     </span>
                   )}
                   <p className="text-white font-semibold text-lg mb-2">{address.name}</p>
@@ -406,7 +422,7 @@ export default function AccountPage() {
                       className="border-white/20 text-white hover:bg-white/10"
                     >
                       <Edit className="h-4 w-4 mr-1" />
-                      Edit
+                      {content["account.addresses.editButton"] || "Edit"}
                     </Button>
                     <Button
                       size="sm"
@@ -415,7 +431,7 @@ export default function AccountPage() {
                       className="border-red-500/20 text-red-400 hover:bg-red-500/10"
                     >
                       <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
+                      {content["account.addresses.deleteButton"] || "Delete"}
                     </Button>
                   </div>
                 </div>
@@ -428,18 +444,18 @@ export default function AccountPage() {
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 p-8">
           <div className="flex items-center gap-3 mb-6">
             <Package className="h-6 w-6 text-brand-orange" />
-            <h2 className="text-2xl font-bold text-white">Order History</h2>
+            <h2 className="text-2xl font-bold text-white">{content["account.orders.heading"] || "Order History"}</h2>
           </div>
 
           {isLoading ? (
-            <p className="text-white/60 text-center py-8">Loading orders...</p>
+            <p className="text-white/60 text-center py-8">{content["account.orders.loading"] || "Loading orders..."}</p>
           ) : orders.length === 0 ? (
             <div className="text-center py-12">
               <ShoppingBag className="h-16 w-16 text-white/30 mx-auto mb-4" />
-              <p className="text-white/60 mb-6 text-lg">You haven't placed any orders yet</p>
+              <p className="text-white/60 mb-6 text-lg">{content["account.orders.empty"] || "You haven't placed any orders yet"}</p>
               <Link href="/shop">
                 <Button size="lg" className="bg-brand-orange hover:bg-brand-orange/90">
-                  Start Shopping
+                  {content["account.orders.startShopping"] || "Start Shopping"}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -476,7 +492,7 @@ export default function AccountPage() {
                           </span>
                           <span className="flex items-center gap-1">
                             <Package className="h-4 w-4" />
-                            {Array.isArray(order.items) ? order.items.length : 0} items
+                            {Array.isArray(order.items) ? order.items.length : 0} {content["account.orders.items"] || "items"}
                           </span>
                         </div>
                       </div>

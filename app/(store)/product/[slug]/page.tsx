@@ -17,6 +17,7 @@ import {
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
+import { getContentBySection } from "@/lib/site-content";
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const productData = await prisma.product.findUnique({
@@ -61,6 +62,9 @@ export default async function ProductPage({ params }: { params: { slug: string }
     notFound();
   }
 
+  // Fetch content for product page
+  const content = await getContentBySection("product");
+
   // Transform to match Product type
   const product = {
     slug: productData.slug,
@@ -86,7 +90,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
       <Link href="/shop">
         <Button variant="ghost" className="mb-8">
           <ChevronLeft className="mr-2 h-4 w-4" />
-          Back to Shop
+          {content["product.backToShop"] || "Back to Shop"}
         </Button>
       </Link>
 
@@ -131,7 +135,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
             <Price price={product.price} currency={product.currency} className="text-3xl font-bold" />
             {!product.inStock && (
               <span className="rounded bg-red-100 px-2 py-1 text-xs font-semibold text-red-600">
-                Out of Stock
+                {content["product.outOfStock"] || "Out of Stock"}
               </span>
             )}
           </div>
@@ -154,7 +158,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="fabric">
                 <AccordionTrigger className="text-lg font-semibold">
-                  Fabric & Construction
+                  {content["product.accordion.fabric"] || "Fabric & Construction"}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
                   {product.fabric}
@@ -162,7 +166,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
               </AccordionItem>
               <AccordionItem value="care">
                 <AccordionTrigger className="text-lg font-semibold">
-                  Care Instructions
+                  {content["product.accordion.care"] || "Care Instructions"}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
                   {product.care}
@@ -170,7 +174,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
               </AccordionItem>
               <AccordionItem value="shipping">
                 <AccordionTrigger className="text-lg font-semibold">
-                  Shipping & Returns
+                  {content["product.accordion.shipping"] || "Shipping & Returns"}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
                   {product.shipping}
@@ -183,7 +187,9 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
       {/* Customer Reviews */}
       <div className="mt-20 border-t pt-12">
-        <h2 className="mb-8 font-heading text-3xl font-bold">Customer Reviews</h2>
+        <h2 className="mb-8 font-heading text-3xl font-bold">
+          {content["product.reviews.title"] || "Customer Reviews"}
+        </h2>
         <ProductReviews productSlug={product.slug} />
       </div>
 

@@ -21,6 +21,22 @@ export function SearchResultsModal({ query, onClose }: SearchResultsModalProps) 
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [content, setContent] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/site-content?section=searchResults")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   useEffect(() => {
     if (query.trim()) {
@@ -69,17 +85,17 @@ export function SearchResultsModal({ query, onClose }: SearchResultsModalProps) 
       {/* Header */}
       <div className="mb-6">
         <h2 className="font-heading text-2xl font-bold">
-          Search Results
+          {content["searchResults.heading"] || "Search Results"}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           {isLoading ? (
-            "Searching..."
+            content["searchResults.loading"] || "Searching..."
           ) : results.length > 0 ? (
             <>
-              Found {results.length} {results.length === 1 ? "result" : "results"} for &quot;{query}&quot;
+              Found {results.length} {results.length === 1 ? (content["searchResults.singular"] || "result") : (content["searchResults.plural"] || "results")} for &quot;{query}&quot;
             </>
           ) : (
-            <>No results found for &quot;{query}&quot;</>
+            <>{content["searchResults.noResults"] || "No results found"} for &quot;{query}&quot;</>
           )}
         </p>
       </div>
@@ -113,7 +129,7 @@ export function SearchResultsModal({ query, onClose }: SearchResultsModalProps) 
       {!isLoading && !error && results.length === 0 && (
         <div className="py-12 text-center">
           <p className="text-muted-foreground">
-            No products match your search. Try different keywords.
+            {content["searchResults.noMatch"] || "No products match your search. Try different keywords."}
           </p>
           <div className="mt-6">
             <Link
@@ -121,7 +137,7 @@ export function SearchResultsModal({ query, onClose }: SearchResultsModalProps) 
               onClick={onClose}
               className="inline-block rounded-md bg-brand-black px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-orange"
             >
-              Browse All Products
+              {content["searchResults.browseAll"] || "Browse All Products"}
             </Link>
           </div>
         </div>

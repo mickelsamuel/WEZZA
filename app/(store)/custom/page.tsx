@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const dynamic = "force-dynamic";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ const COLORS = ["Black", "White", "Burnt Orange", "Peach", "Warm Gray", "Other"]
 const SIZES = ["S", "M", "L", "XL", "XXL"];
 
 export default function CustomOrderPage() {
+  const [content, setContent] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -36,6 +37,21 @@ export default function CustomOrderPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetch("/api/site-content?section=custom")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   const handleImageChange = (file: File | null, preview: string | null) => {
     setUploadedFile(file);
@@ -68,8 +84,8 @@ export default function CustomOrderPage() {
 
       setIsSubmitted(true);
       toast({
-        title: "Order submitted!",
-        description: "We'll contact you within 24 hours to discuss your custom design.",
+        title: content["custom.toast.success.title"] || "Order submitted!",
+        description: content["custom.toast.success.description"] || "We'll contact you within 24 hours to discuss your custom design.",
       });
 
       // Reset form
@@ -85,8 +101,8 @@ export default function CustomOrderPage() {
       setImagePreview(null);
     } catch (error) {
       toast({
-        title: "Submission failed",
-        description: error instanceof Error ? error.message : "Please try again",
+        title: content["custom.toast.error.title"] || "Submission failed",
+        description: error instanceof Error ? error.message : (content["custom.toast.error.description"] || "Please try again"),
         variant: "destructive",
       });
     } finally {
@@ -98,16 +114,20 @@ export default function CustomOrderPage() {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <CheckCircle2 className="mx-auto h-24 w-24 text-green-500" />
-        <h1 className="mt-6 font-heading text-3xl font-bold">Order Submitted!</h1>
+        <h1 className="mt-6 font-heading text-3xl font-bold">
+          {content["custom.success.title"] || "Order Submitted!"}
+        </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Thank you for your custom order request.
+          {content["custom.success.message"] || "Thank you for your custom order request."}
           <br />
-          We'll review your design notes and get back to you within 24 hours.
+          {content["custom.success.followUp"] || "We'll review your design notes and get back to you within 24 hours."}
         </p>
         <div className="mt-8 space-x-4">
-          <Button onClick={() => setIsSubmitted(false)}>Submit Another</Button>
+          <Button onClick={() => setIsSubmitted(false)}>
+            {content["custom.success.submitAnother"] || "Submit Another"}
+          </Button>
           <Button variant="outline" onClick={() => (window.location.href = "/shop")}>
-            Continue Shopping
+            {content["custom.success.continueShopping"] || "Continue Shopping"}
           </Button>
         </div>
       </div>
@@ -118,9 +138,11 @@ export default function CustomOrderPage() {
     <div className="container mx-auto px-4 py-12">
       <div className="mx-auto max-w-3xl">
         <div className="mb-8 text-center">
-          <h1 className="font-heading text-4xl font-bold md:text-5xl">Custom Orders</h1>
+          <h1 className="font-heading text-4xl font-bold md:text-5xl">
+            {content["custom.pageTitle"] || "Custom Orders"}
+          </h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Create your perfect hoodie. Starting at $89.99 CAD
+            {content["custom.pageDescription"] || "Create your perfect hoodie. Starting at $89.99 CAD"}
           </p>
         </div>
 
@@ -128,7 +150,7 @@ export default function CustomOrderPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
-                <Label htmlFor="name">Full Name *</Label>
+                <Label htmlFor="name">{content["custom.form.name.label"] || "Full Name *"}</Label>
                 <Input
                   id="name"
                   required
@@ -139,7 +161,7 @@ export default function CustomOrderPage() {
               </div>
 
               <div>
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email">{content["custom.form.email.label"] || "Email *"}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -153,14 +175,14 @@ export default function CustomOrderPage() {
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
-                <Label htmlFor="color">Hoodie Color *</Label>
+                <Label htmlFor="color">{content["custom.form.color.label"] || "Hoodie Color *"}</Label>
                 <Select
                   required
                   value={formData.hoodieColor}
                   onValueChange={(value) => setFormData({ ...formData, hoodieColor: value })}
                 >
                   <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select a color" />
+                    <SelectValue placeholder={content["custom.form.color.placeholder"] || "Select a color"} />
                   </SelectTrigger>
                   <SelectContent>
                     {COLORS.map((color) => (
@@ -173,14 +195,14 @@ export default function CustomOrderPage() {
               </div>
 
               <div>
-                <Label htmlFor="size">Size *</Label>
+                <Label htmlFor="size">{content["custom.form.size.label"] || "Size *"}</Label>
                 <Select
                   required
                   value={formData.size}
                   onValueChange={(value) => setFormData({ ...formData, size: value })}
                 >
                   <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select a size" />
+                    <SelectValue placeholder={content["custom.form.size.placeholder"] || "Select a size"} />
                   </SelectTrigger>
                   <SelectContent>
                     {SIZES.map((size) => (
@@ -194,21 +216,21 @@ export default function CustomOrderPage() {
             </div>
 
             <div>
-              <Label htmlFor="designNotes">Design Notes *</Label>
+              <Label htmlFor="designNotes">{content["custom.form.designNotes.label"] || "Design Notes *"}</Label>
               <Textarea
                 id="designNotes"
                 required
                 value={formData.designNotes}
                 onChange={(e) => setFormData({ ...formData, designNotes: e.target.value })}
-                placeholder="Describe your design idea in detail. Include placement, colors, text, graphics, etc."
+                placeholder={content["custom.form.designNotes.placeholder"] || "Describe your design idea in detail. Include placement, colors, text, graphics, etc."}
                 className="mt-2 min-h-[150px]"
               />
             </div>
 
             <div>
-              <Label>Design Image (Optional)</Label>
+              <Label>{content["custom.form.image.label"] || "Design Image (Optional)"}</Label>
               <p className="mt-1 mb-3 text-sm text-muted-foreground">
-                Upload a design mockup, sketch, or reference image
+                {content["custom.form.image.description"] || "Upload a design mockup, sketch, or reference image"}
               </p>
               <ImageUpload
                 onImageChange={handleImageChange}
@@ -218,26 +240,28 @@ export default function CustomOrderPage() {
             </div>
 
             <div>
-              <Label htmlFor="imageUrl">Or Paste Image URL (Optional)</Label>
+              <Label htmlFor="imageUrl">{content["custom.form.imageUrl.label"] || "Or Paste Image URL (Optional)"}</Label>
               <Input
                 id="imageUrl"
                 type="url"
                 value={formData.imageUrl}
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                placeholder="https://example.com/your-design.jpg"
+                placeholder={content["custom.form.imageUrl.placeholder"] || "https://example.com/your-design.jpg"}
                 className="mt-2"
               />
               <p className="mt-1 text-sm text-muted-foreground">
-                Already have your design hosted online? Paste the link here.
+                {content["custom.form.imageUrl.description"] || "Already have your design hosted online? Paste the link here."}
               </p>
             </div>
 
             <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : "Submit Custom Order"}
+              {isSubmitting
+                ? (content["custom.form.submit.submitting"] || "Submitting...")
+                : (content["custom.form.submit.default"] || "Submit Custom Order")}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">
-              We'll review your request and email you within 24 hours with pricing and timeline.
+              {content["custom.form.footer"] || "We'll review your request and email you within 24 hours with pricing and timeline."}
             </p>
           </form>
         </Card>

@@ -30,12 +30,29 @@ export default function SizeRecommendationModal({
   const [loading, setLoading] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [recommendedSize, setRecommendedSize] = useState<string | null>(null);
+  const [content, setContent] = useState<Record<string, string>>({});
   const [profile, setProfile] = useState<SizingProfile>({
     heightCm: '',
     weightKg: '',
     chestCm: '',
     preferredFit: 'regular',
   });
+
+  // Load site content
+  useEffect(() => {
+    fetch("/api/site-content?section=sizeRec")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   // Load existing profile
   useEffect(() => {
@@ -72,7 +89,7 @@ export default function SizeRecommendationModal({
 
   const handleCalculate = async () => {
     if (!profile.heightCm || !profile.weightKg) {
-      toast.error('Please enter your height and weight');
+      toast.error(content["sizeRec.error.requiredFields"] || 'Please enter your height and weight');
       return;
     }
 
@@ -93,7 +110,7 @@ export default function SizeRecommendationModal({
       });
 
       if (!response.ok) {
-        throw new Error('Failed to calculate size');
+        throw new Error(content["sizeRec.error.calculateFailed"] || 'Failed to calculate size');
       }
 
       const data = await response.json();
@@ -106,7 +123,7 @@ export default function SizeRecommendationModal({
       }
     } catch (error) {
       console.error('Error calculating size:', error);
-      toast.error('Failed to calculate recommended size');
+      toast.error(content["sizeRec.error.calculationError"] || 'Failed to calculate recommended size');
     } finally {
       setLoading(false);
     }
@@ -126,17 +143,17 @@ export default function SizeRecommendationModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <Ruler className="w-6 h-6" />
-            Find Your Perfect Size
+            {content["sizeRec.title"] || "Find Your Perfect Size"}
           </DialogTitle>
           <DialogDescription>
-            Enter your measurements to get a personalized size recommendation
+            {content["sizeRec.description"] || "Enter your measurements to get a personalized size recommendation"}
           </DialogDescription>
         </DialogHeader>
 
         {loadingProfile ? (
           <div className="py-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
-            <p className="mt-4 text-sm text-gray-600">Loading your profile...</p>
+            <p className="mt-4 text-sm text-gray-600">{content["sizeRec.loadingProfile"] || "Loading your profile..."}</p>
           </div>
         ) : (
           <div className="space-y-6 py-4">
@@ -145,7 +162,7 @@ export default function SizeRecommendationModal({
               <div className="bg-brand-orange/10 border-2 border-brand-orange rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-700">Your Recommended Size</p>
+                    <p className="text-sm font-medium text-gray-700">{content["sizeRec.recommended"] || "Your Recommended Size"}</p>
                     <p className="text-3xl font-bold text-brand-orange mt-1">{recommendedSize}</p>
                   </div>
                   <TrendingUp className="w-12 h-12 text-brand-orange" />
@@ -153,7 +170,7 @@ export default function SizeRecommendationModal({
                 {sizeGuide[recommendedSize as keyof typeof sizeGuide] && (
                   <div className="mt-3 pt-3 border-t border-brand-orange/20">
                     <p className="text-xs text-gray-600">
-                      <span className="font-semibold">Chest:</span> {sizeGuide[recommendedSize as keyof typeof sizeGuide].chest} •{' '}
+                      <span className="font-semibold">{content["sizeRec.chest"] || "Chest: "}</span>{sizeGuide[recommendedSize as keyof typeof sizeGuide].chest} •{' '}
                       <span className="font-semibold">Length:</span> {sizeGuide[recommendedSize as keyof typeof sizeGuide].length} •{' '}
                       <span className="font-semibold">Shoulder:</span> {sizeGuide[recommendedSize as keyof typeof sizeGuide].shoulder}
                     </p>
@@ -166,12 +183,12 @@ export default function SizeRecommendationModal({
             <div className="space-y-2">
               <Label htmlFor="height" className="flex items-center gap-2">
                 <User className="w-4 h-4" />
-                Height (cm) *
+                {content["sizeRec.height.label"] || "Height (cm) *"}
               </Label>
               <Input
                 id="height"
                 type="number"
-                placeholder="e.g., 175"
+                placeholder={content["sizeRec.height.placeholder"] || "e.g., 175"}
                 value={profile.heightCm}
                 onChange={(e) => setProfile({ ...profile, heightCm: e.target.value ? Number(e.target.value) : '' })}
                 min="140"
@@ -183,12 +200,12 @@ export default function SizeRecommendationModal({
             <div className="space-y-2">
               <Label htmlFor="weight" className="flex items-center gap-2">
                 <User className="w-4 h-4" />
-                Weight (kg) *
+                {content["sizeRec.weight.label"] || "Weight (kg) *"}
               </Label>
               <Input
                 id="weight"
                 type="number"
-                placeholder="e.g., 70"
+                placeholder={content["sizeRec.weight.placeholder"] || "e.g., 70"}
                 value={profile.weightKg}
                 onChange={(e) => setProfile({ ...profile, weightKg: e.target.value ? Number(e.target.value) : '' })}
                 min="40"
@@ -200,23 +217,23 @@ export default function SizeRecommendationModal({
             <div className="space-y-2">
               <Label htmlFor="chest" className="flex items-center gap-2">
                 <Ruler className="w-4 h-4" />
-                Chest Measurement (cm) <span className="text-xs text-gray-500 ml-1">(optional)</span>
+                {content["sizeRec.chest.label"] || "Chest Measurement (cm) (optional)"}
               </Label>
               <Input
                 id="chest"
                 type="number"
-                placeholder="e.g., 105"
+                placeholder={content["sizeRec.chest.placeholder"] || "e.g., 105"}
                 value={profile.chestCm}
                 onChange={(e) => setProfile({ ...profile, chestCm: e.target.value ? Number(e.target.value) : '' })}
                 min="80"
                 max="150"
               />
-              <p className="text-xs text-gray-500">Measure around the fullest part of your chest</p>
+              <p className="text-xs text-gray-500">{content["sizeRec.chest.help"] || "Measure around the fullest part of your chest"}</p>
             </div>
 
             {/* Preferred Fit */}
             <div className="space-y-3">
-              <Label>Preferred Fit</Label>
+              <Label>{content["sizeRec.fit.label"] || "Preferred Fit"}</Label>
               <RadioGroup
                 value={profile.preferredFit}
                 onValueChange={(value) => setProfile({ ...profile, preferredFit: value as 'slim' | 'regular' | 'oversized' })}
@@ -224,22 +241,22 @@ export default function SizeRecommendationModal({
                 <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-gray-50">
                   <RadioGroupItem value="slim" id="slim" />
                   <Label htmlFor="slim" className="flex-1 cursor-pointer">
-                    <span className="font-medium">Slim Fit</span>
-                    <p className="text-xs text-gray-500">Closer to body, more fitted</p>
+                    <span className="font-medium">{content["sizeRec.fit.slim.title"] || "Slim Fit"}</span>
+                    <p className="text-xs text-gray-500">{content["sizeRec.fit.slim.desc"] || "Closer to body, more fitted"}</p>
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-gray-50">
                   <RadioGroupItem value="regular" id="regular" />
                   <Label htmlFor="regular" className="flex-1 cursor-pointer">
-                    <span className="font-medium">Regular Fit</span>
-                    <p className="text-xs text-gray-500">Classic, comfortable fit</p>
+                    <span className="font-medium">{content["sizeRec.fit.regular.title"] || "Regular Fit"}</span>
+                    <p className="text-xs text-gray-500">{content["sizeRec.fit.regular.desc"] || "Classic, comfortable fit"}</p>
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-gray-50">
                   <RadioGroupItem value="oversized" id="oversized" />
                   <Label htmlFor="oversized" className="flex-1 cursor-pointer">
-                    <span className="font-medium">Oversized Fit</span>
-                    <p className="text-xs text-gray-500">Relaxed, roomy fit</p>
+                    <span className="font-medium">{content["sizeRec.fit.oversized.title"] || "Oversized Fit"}</span>
+                    <p className="text-xs text-gray-500">{content["sizeRec.fit.oversized.desc"] || "Relaxed, roomy fit"}</p>
                   </Label>
                 </div>
               </RadioGroup>
@@ -252,7 +269,7 @@ export default function SizeRecommendationModal({
                 disabled={loading || !profile.heightCm || !profile.weightKg}
                 className="flex-1 bg-brand-orange hover:bg-brand-orange/90"
               >
-                {loading ? 'Calculating...' : recommendedSize ? 'Recalculate Size' : 'Calculate My Size'}
+                {loading ? (content["sizeRec.calculating"] || 'Calculating...') : recommendedSize ? (content["sizeRec.recalculate"] || 'Recalculate Size') : (content["sizeRec.calculate"] || 'Calculate My Size')}
               </Button>
               {recommendedSize && onSizeRecommended && (
                 <Button
@@ -263,14 +280,14 @@ export default function SizeRecommendationModal({
                   variant="outline"
                   className="flex-1"
                 >
-                  Use This Size
+                  {content["sizeRec.useSize"] || "Use This Size"}
                 </Button>
               )}
             </div>
 
             {/* Size Guide Reference */}
             <div className="mt-6 pt-6 border-t">
-              <h4 className="font-semibold mb-3 text-sm">Full Size Guide</h4>
+              <h4 className="font-semibold mb-3 text-sm">{content["sizeRec.fullGuide"] || "Full Size Guide"}</h4>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                 {Object.entries(sizeGuide).map(([size, measurements]) => (
                   <div
@@ -280,7 +297,7 @@ export default function SizeRecommendationModal({
                     }`}
                   >
                     <p className="font-bold text-sm">{size}</p>
-                    <p className="text-gray-600">Chest: {measurements.chest}</p>
+                    <p className="text-gray-600">{content["sizeRec.chest"] || "Chest: "}{measurements.chest}</p>
                   </div>
                 ))}
               </div>

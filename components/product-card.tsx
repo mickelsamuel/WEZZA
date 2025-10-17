@@ -1,14 +1,34 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Product } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Price } from "@/components/price";
+import { useState, useEffect } from "react";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const [content, setContent] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/site-content?section=productCard")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
+
   return (
     <Link href={`/product/${product.slug}`}>
       <Card className="group overflow-hidden transition-all hover:shadow-lg">
@@ -22,12 +42,12 @@ export function ProductCard({ product }: ProductCardProps) {
           />
           {product.tags.includes("new") && (
             <span className="absolute right-3 top-3 rounded-md bg-brand-orange px-2 py-1 text-xs font-semibold text-white">
-              NEW
+              {content["productCard.new"] || "NEW"}
             </span>
           )}
           {product.tags.includes("bestseller") && (
             <span className="absolute left-3 top-3 rounded-md bg-brand-black px-2 py-1 text-xs font-semibold text-white">
-              BESTSELLER
+              {content["productCard.bestseller"] || "BESTSELLER"}
             </span>
           )}
         </div>
@@ -39,7 +59,9 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="mt-2 flex items-center justify-between">
             <Price price={product.price} currency={product.currency} className="text-lg font-bold" />
             {!product.inStock && (
-              <span className="text-xs text-red-600">Out of Stock</span>
+              <span className="text-xs text-red-600">
+                {content["productCard.outOfStock"] || "Out of Stock"}
+              </span>
             )}
           </div>
         </CardContent>

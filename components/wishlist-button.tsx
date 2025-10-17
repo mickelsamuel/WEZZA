@@ -16,8 +16,24 @@ export function WishlistButton({ productSlug, variant = "default" }: WishlistBut
   const { data: session, status } = useSession();
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [content, setContent] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const { openAuthModal } = useAuthModal();
+
+  useEffect(() => {
+    fetch("/api/site-content?section=wishlistButton")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -55,8 +71,8 @@ export function WishlistButton({ productSlug, variant = "default" }: WishlistBut
         if (response.ok) {
           setIsInWishlist(false);
           toast({
-            title: "Removed from wishlist",
-            description: "Product removed from your wishlist",
+            title: content["wishlistButton.toast.removed.title"] || "Removed from wishlist",
+            description: content["wishlistButton.toast.removed.description"] || "Product removed from your wishlist",
           });
         }
       } else {
@@ -70,15 +86,15 @@ export function WishlistButton({ productSlug, variant = "default" }: WishlistBut
         if (response.ok) {
           setIsInWishlist(true);
           toast({
-            title: "Added to wishlist",
-            description: "Product added to your wishlist",
+            title: content["wishlistButton.toast.added.title"] || "Added to wishlist",
+            description: content["wishlistButton.toast.added.description"] || "Product added to your wishlist",
           });
         }
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Something went wrong",
+        title: content["wishlistButton.toast.error.title"] || "Error",
+        description: content["wishlistButton.toast.error.description"] || "Something went wrong",
         variant: "destructive",
       });
     } finally {
@@ -94,7 +110,7 @@ export function WishlistButton({ productSlug, variant = "default" }: WishlistBut
         className={`rounded-full p-2 transition-all hover:bg-white/20 ${
           isInWishlist ? "text-red-500" : "text-white"
         }`}
-        title={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+        title={isInWishlist ? (content["wishlistButton.removeTitle"] || "Remove from wishlist") : (content["wishlistButton.addTitle"] || "Add to wishlist")}
       >
         <Heart
           className={`h-5 w-5 ${isInWishlist ? "fill-current" : ""}`}
@@ -114,7 +130,7 @@ export function WishlistButton({ productSlug, variant = "default" }: WishlistBut
       <Heart
         className={`h-5 w-5 ${isInWishlist ? "fill-current text-red-500" : ""}`}
       />
-      {isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+      {isInWishlist ? (content["wishlistButton.remove"] || "Remove from Wishlist") : (content["wishlistButton.add"] || "Add to Wishlist")}
     </Button>
   );
 }

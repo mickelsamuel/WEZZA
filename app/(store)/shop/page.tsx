@@ -13,12 +13,28 @@ type SortOption = "newest" | "price-low" | "price-high";
 
 function ShopPageContent() {
   const searchParams = useSearchParams();
+  const [content, setContent] = useState<Record<string, string>>({});
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [colorFilters, setColorFilters] = useState<string[]>([]);
   const [sizeFilters, setSizeFilters] = useState<string[]>([]);
   const [collectionFilters, setCollectionFilters] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch("/api/site-content?section=shop")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   useEffect(() => {
     const collection = searchParams.get("collection");
@@ -70,9 +86,13 @@ function ShopPageContent() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="mb-8">
-        <h1 className="font-heading text-4xl font-bold md:text-5xl">Shop All Hoodies</h1>
+        <h1 className="font-heading text-4xl font-bold md:text-5xl">
+          {content["shop.pageTitle"] || "Shop All Hoodies"}
+        </h1>
         <p className="mt-2 text-muted-foreground">
-          {products.length} {products.length === 1 ? "product" : "products"} available
+          {products.length} {products.length === 1
+            ? (content["shop.productCount.singular"] || "product")
+            : (content["shop.productCount.plural"] || "products")} {content["shop.productCount.available"] || "available"}
         </p>
       </div>
 
@@ -80,7 +100,9 @@ function ShopPageContent() {
         {/* Filters Sidebar */}
         <aside className="lg:col-span-1">
           <Card className="p-6">
-            <h2 className="mb-4 font-heading text-xl font-bold">Filters</h2>
+            <h2 className="mb-4 font-heading text-xl font-bold">
+              {content["shop.filters.title"] || "Filters"}
+            </h2>
             <Filters
               onColorChange={setColorFilters}
               onSizeChange={setSizeFilters}
@@ -95,7 +117,9 @@ function ShopPageContent() {
         <div className="lg:col-span-3">
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Loading products...</p>
+              <p className="text-muted-foreground">
+                {content["shop.loading"] || "Loading products..."}
+              </p>
             </div>
           ) : (
             <ProductGrid products={products} />
@@ -108,7 +132,11 @@ function ShopPageContent() {
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={<div className="container mx-auto px-4 py-12">Loading...</div>}>
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-12">
+        <p>Loading...</p>
+      </div>
+    }>
       <ShopPageContent />
     </Suspense>
   );

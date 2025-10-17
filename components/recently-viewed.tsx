@@ -15,6 +15,22 @@ interface RecentlyViewedProps {
 
 export function RecentlyViewed({ currentProductSlug, limit = 4 }: RecentlyViewedProps) {
   const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+  const [content, setContent] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/site-content?section=recentlyViewed")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
 
   useEffect(() => {
     loadRecentlyViewed();
@@ -58,10 +74,10 @@ export function RecentlyViewed({ currentProductSlug, limit = 4 }: RecentlyViewed
       <div className="mb-8">
         <div className="flex items-center gap-2">
           <Clock className="h-6 w-6 text-brand-orange" />
-          <h2 className="font-heading text-3xl font-bold md:text-4xl">Recently Viewed</h2>
+          <h2 className="font-heading text-3xl font-bold md:text-4xl">{content["recentlyViewed.heading"] || "Recently Viewed"}</h2>
         </div>
         <p className="mt-2 text-muted-foreground">
-          Pick up where you left off
+          {content["recentlyViewed.description"] || "Pick up where you left off"}
         </p>
       </div>
 

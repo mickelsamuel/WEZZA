@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Product } from "@/lib/types";
 import { ProductCard } from "@/components/product-card";
 
@@ -6,10 +9,29 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({ products }: ProductGridProps) {
+  const [content, setContent] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/site-content?section=productGrid")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
+
   if (products.length === 0) {
     return (
       <div className="py-12 text-center">
-        <p className="text-lg text-muted-foreground">No products found matching your criteria.</p>
+        <p className="text-lg text-muted-foreground">
+          {content["productGrid.empty"] || "No products found matching your criteria."}
+        </p>
       </div>
     );
   }

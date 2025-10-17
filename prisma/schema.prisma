@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // NextAuth.js models
@@ -421,4 +422,18 @@ model SiteImage {
   updatedAt   DateTime @updatedAt
 
   @@index([key])
+}
+
+// Site-wide text content for admin control
+model SiteContent {
+  id          String   @id @default(cuid())
+  key         String   @unique // "hero.title", "hero.description", "footer.copyright", etc.
+  value       String   @db.Text
+  section     String // "hero", "footer", "navigation", "about", etc.
+  description String?  @db.Text // What this content is for
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([key])
+  @@index([section])
 }

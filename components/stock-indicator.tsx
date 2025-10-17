@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { AlertCircle, Package } from "lucide-react";
 import { Product } from "@/lib/types";
 
@@ -9,17 +10,33 @@ interface StockIndicatorProps {
 }
 
 export function StockIndicator({ product, selectedSize }: StockIndicatorProps) {
+  const [content, setContent] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/site-content?section=stockIndicator")
+      .then((res) => res.json())
+      .then((data) => {
+        const contentMap: Record<string, string> = {};
+        data.content?.forEach((item: any) => {
+          contentMap[item.key] = item.value;
+        });
+        setContent(contentMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  }, []);
   // If no stock data, just show basic in stock status
   if (!product.stockBySize && !product.totalStock) {
     return product.inStock ? (
       <div className="flex items-center gap-2 text-sm text-green-600">
         <Package className="h-4 w-4" />
-        <span>In Stock</span>
+        <span>{content["stockIndicator.inStock"] || "In Stock"}</span>
       </div>
     ) : (
       <div className="flex items-center gap-2 text-sm text-red-600">
         <AlertCircle className="h-4 w-4" />
-        <span>Out of Stock</span>
+        <span>{content["stockIndicator.outOfStock"] || "Out of Stock"}</span>
       </div>
     );
   }
@@ -32,7 +49,7 @@ export function StockIndicator({ product, selectedSize }: StockIndicatorProps) {
       return (
         <div className="flex items-center gap-2 text-sm text-red-600">
           <AlertCircle className="h-4 w-4" />
-          <span>Out of Stock in {selectedSize}</span>
+          <span>{content["stockIndicator.outOfStockIn"] || "Out of Stock in"} {selectedSize}</span>
         </div>
       );
     }
@@ -41,7 +58,7 @@ export function StockIndicator({ product, selectedSize }: StockIndicatorProps) {
       return (
         <div className="flex items-center gap-2 text-sm text-orange-600">
           <AlertCircle className="h-4 w-4" />
-          <span>Only {stock} left in {selectedSize}!</span>
+          <span>{content["stockIndicator.onlyLeft"] || "Only"} {stock} {content["stockIndicator.leftInSize"] || "left in"} {selectedSize}!</span>
         </div>
       );
     }
@@ -49,7 +66,7 @@ export function StockIndicator({ product, selectedSize }: StockIndicatorProps) {
     return (
       <div className="flex items-center gap-2 text-sm text-green-600">
         <Package className="h-4 w-4" />
-        <span>In Stock</span>
+        <span>{content["stockIndicator.inStock"] || "In Stock"}</span>
       </div>
     );
   }
@@ -60,7 +77,7 @@ export function StockIndicator({ product, selectedSize }: StockIndicatorProps) {
       return (
         <div className="flex items-center gap-2 text-sm text-red-600">
           <AlertCircle className="h-4 w-4" />
-          <span>Out of Stock</span>
+          <span>{content["stockIndicator.outOfStock"] || "Out of Stock"}</span>
         </div>
       );
     }
@@ -69,7 +86,7 @@ export function StockIndicator({ product, selectedSize }: StockIndicatorProps) {
       return (
         <div className="flex items-center gap-2 text-sm text-orange-600">
           <AlertCircle className="h-4 w-4" />
-          <span>Only {product.totalStock} left!</span>
+          <span>{content["stockIndicator.onlyLeft"] || "Only"} {product.totalStock} {content["stockIndicator.left"] || "left"}!</span>
         </div>
       );
     }
@@ -78,7 +95,7 @@ export function StockIndicator({ product, selectedSize }: StockIndicatorProps) {
   return (
     <div className="flex items-center gap-2 text-sm text-green-600">
       <Package className="h-4 w-4" />
-      <span>In Stock</span>
+      <span>{content["stockIndicator.inStock"] || "In Stock"}</span>
     </div>
   );
 }
