@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Transform to match Product type
-    const transformedProducts = products.map((p) => ({
+    const transformedProducts = products.map((p: any) => ({
       slug: p.slug,
       title: p.title,
       description: p.description,

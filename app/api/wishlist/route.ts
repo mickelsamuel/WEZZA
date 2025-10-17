@@ -26,7 +26,7 @@ export async function GET() {
 
     // Fetch product details for each wishlist item
     const wishlist = await Promise.all(
-      wishlistItems.map(async (item) => {
+      wishlistItems.map(async (item: any) => {
         const product = await prisma.product.findUnique({
           where: { slug: item.productSlug },
           select: {

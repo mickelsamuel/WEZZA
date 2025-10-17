@@ -131,9 +131,9 @@ async function getUserBehavior(userId: string) {
   ]);
 
   // Extract purchased product slugs
-  const purchasedSlugs = orders.flatMap((order) => {
+  const purchasedSlugs = orders.flatMap((order: any) => {
     const items = order.items as any[];
-    return items.map((item) => item.slug);
+    return items.map((item: any) => item.slug);
   });
 
   // Extract collections and colors from user behavior
@@ -141,7 +141,7 @@ async function getUserBehavior(userId: string) {
   const behaviorProducts = allProducts.filter(
     (p) =>
       purchasedSlugs.includes(p.slug) ||
-      wishlist.some((w) => w.productSlug === p.slug)
+      wishlist.some((w: any) => w.productSlug === p.slug)
   );
 
   const favoriteCollections = getMostCommon(
@@ -153,11 +153,11 @@ async function getUserBehavior(userId: string) {
 
   return {
     purchasedSlugs,
-    wishlistSlugs: wishlist.map((w) => w.productSlug),
-    reviewedSlugs: reviews.map((r) => r.productSlug),
+    wishlistSlugs: wishlist.map((w: any) => w.productSlug),
+    reviewedSlugs: reviews.map((r: any) => r.productSlug),
     searchedSlugs: searchHistory
-      .filter((s) => s.clicked)
-      .map((s) => s.clicked as string),
+      .filter((s: any) => s.clicked)
+      .map((s: any) => s.clicked as string),
     favoriteCollections,
     favoriteColors,
   };

@@ -4,8 +4,9 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 // PUT /api/addresses/[id] - Update address
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
@@ -17,7 +18,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     // Verify ownership
     const existingAddress = await prisma.address.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingAddress || existingAddress.userId !== session.user.id) {
@@ -30,14 +31,14 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         where: {
           userId: session.user.id,
           isDefault: true,
-          id: { not: params.id },
+          id: { not: id },
         },
         data: { isDefault: false },
       });
     }
 
     const address = await prisma.address.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name,
         street,
@@ -57,8 +58,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // DELETE /api/addresses/[id] - Delete address
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
@@ -67,7 +69,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     // Verify ownership
     const existingAddress = await prisma.address.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingAddress || existingAddress.userId !== session.user.id) {
@@ -75,7 +77,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     await prisma.address.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: "Address deleted" });

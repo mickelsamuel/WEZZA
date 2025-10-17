@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     });
 
     const lineItems = items.map((item) => {
-      const product = products.find((p) => p.slug === item.slug);
+      const product = products.find((p: any) => p.slug === item.slug);
 
       if (!product) {
         throw new Error(`Product not found: ${item.slug}`);

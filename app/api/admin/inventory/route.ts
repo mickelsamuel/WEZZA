@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     // Get product details for each inventory item
     const inventoryWithProducts = await Promise.all(
-      inventory.map(async (inv) => {
+      inventory.map(async (inv: any) => {
         const product = await prisma.product.findUnique({
           where: { slug: inv.productSlug },
           select: {

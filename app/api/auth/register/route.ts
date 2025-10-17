@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     });
 
     // Send welcome email (async, don't wait)
-    sendWelcomeEmail(user.email, user.name || "", user.id).catch((error) => {
+    sendWelcomeEmail(user.email, user.name || "", user.id).catch((error: any) => {
       console.error("Failed to send welcome email:", error);
     });
 
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         email: user.email,
         source: "account",
       },
-    }).catch((error) => {
+    }).catch((error: any) => {
       console.error("Failed to create email subscription:", error);
     });
 

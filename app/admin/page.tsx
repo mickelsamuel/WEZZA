@@ -191,7 +191,7 @@ export default async function AdminDashboard() {
             <p className="text-center text-gray-500 py-8">No orders yet</p>
           ) : (
             <div className="space-y-4">
-              {stats.recentOrders.map((order) => (
+              {stats.recentOrders.map((order: any) => (
                 <Link
                   key={order.id}
                   href={`/admin/orders/${order.id}`}

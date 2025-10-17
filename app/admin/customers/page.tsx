@@ -26,9 +26,9 @@ async function getCustomers() {
     orderBy: { createdAt: "desc" },
   });
 
-  return customers.map((customer) => ({
+  return customers.map((customer: any) => ({
     ...customer,
-    totalSpent: customer.orders.reduce((sum, order) => {
+    totalSpent: customer.orders.reduce((sum: number, order: any) => {
       if (order.status !== "cancelled") {
         return sum + order.total;
       }
@@ -79,7 +79,7 @@ export default async function CustomersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {customers.map((customer) => (
+                {customers.map((customer: any) => (
                   <TableRow key={customer.id}>
                     <TableCell>
                       <p className="font-medium">{customer.name || "No name"}</p>

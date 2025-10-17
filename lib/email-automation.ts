@@ -284,7 +284,7 @@ export async function processCartAbandonments() {
     });
 
     const results = await Promise.allSettled(
-      abandonments.map((abandonment) =>
+      abandonments.map((abandonment: any) =>
         sendCartAbandonmentEmail(abandonment.id)
       )
     );
@@ -322,7 +322,7 @@ export async function processPostPurchaseEmails() {
     });
 
     const results = await Promise.allSettled(
-      orders.map((order) => sendPostPurchaseEmail(order.id))
+      orders.map((order: any) => sendPostPurchaseEmail(order.id))
     );
 
     const successCount = results.filter(
@@ -368,7 +368,7 @@ export async function sendRestockNotification(
 
     // Send emails in batches
     const results = await Promise.allSettled(
-      notifications.map(async (notification) => {
+      notifications.map(async (notification: any) => {
         const subject = `${productTitle} in ${size} is Back in Stock! 🎉`;
         const htmlContent = generateRestockEmailHTML(
           productTitle,
