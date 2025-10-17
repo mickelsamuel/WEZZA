@@ -210,23 +210,26 @@ export default function InstagramGalleryPage() {
               <p className="mt-2 text-gray-600">See how our community styles their hoodies</p>
             </div>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-              {images.slice(0, TOTAL_IMAGES).map((img, index) => (
-                <div key={index} className="relative aspect-square overflow-hidden rounded-lg bg-gray-200">
-                  {img ? (
-                    <Image
-                      src={img}
-                      alt={`Preview ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 16vw"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                      {index + 1}
-                    </div>
-                  )}
-                </div>
-              ))}
+              {Array.from({ length: TOTAL_IMAGES }).map((_, index) => {
+                const img = images[index];
+                return (
+                  <div key={index} className="relative aspect-square overflow-hidden rounded-lg bg-gray-200">
+                    {img ? (
+                      <Image
+                        src={img}
+                        alt={`Preview ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 16vw"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                        {index + 1}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </CardContent>
