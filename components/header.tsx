@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ShoppingCart, Menu, User, LogOut, Heart } from "lucide-react";
 import { useCartStore } from "@/store/cart";
@@ -44,8 +45,14 @@ export function Header() {
     <>
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center">
-            <h1 className="font-heading text-3xl font-bold tracking-tight">WEZZA</h1>
+          <Link href="/" className="flex items-center -ml-2">
+            <Image
+              src="/logo.png"
+              alt="WEZZA Logo"
+              width={40}
+              height={40}
+              className="rounded-full"
+            />
           </Link>
 
           {/* Desktop Navigation */}
