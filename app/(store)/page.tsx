@@ -32,7 +32,7 @@ const VALUE_PROPS = [
 
 export default async function HomePage() {
   // Get featured products from database with error handling
-  let featuredProducts = [];
+  let featuredProducts: any[] = [];
   let dbError = false;
   try {
     const featuredProductsData = await prisma.product.findMany({
