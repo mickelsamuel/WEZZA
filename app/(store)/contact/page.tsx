@@ -100,7 +100,7 @@ export default function ContactPage() {
           <p className="mt-2 text-muted-foreground">
             We're here to help. Email us at{" "}
             <a href="mailto:hello@wezza.com" className="font-semibold text-brand-orange hover:underline">
-              hello@wezza.com
+              wezza28711@gmail.com
             </a>{" "}
             and we'll get back to you within 24 hours.
           </p>
