@@ -9,11 +9,18 @@ export async function GET(request: NextRequest) {
     const collection = searchParams.get("collection");
     const colors = searchParams.get("colors")?.split(",").filter(Boolean);
     const sizes = searchParams.get("sizes")?.split(",").filter(Boolean);
+    const slugs = searchParams.get("slugs")?.split(",").filter(Boolean);
     const sort = searchParams.get("sort") || "newest";
     const inStock = searchParams.get("inStock") === "true";
 
     // Build where clause
     const where: any = {};
+
+    if (slugs && slugs.length > 0) {
+      where.slug = {
+        in: slugs,
+      };
+    }
 
     if (collection) {
       where.collection = {

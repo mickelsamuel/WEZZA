@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Product } from "@/lib/types";
-import { getProductBySlug } from "@/lib/products";
 import { ProductCard } from "@/components/product-card";
 import { Clock } from "lucide-react";
 
@@ -21,7 +20,7 @@ export function RecentlyViewed({ currentProductSlug, limit = 4 }: RecentlyViewed
     loadRecentlyViewed();
   }, [currentProductSlug, limit]);
 
-  const loadRecentlyViewed = () => {
+  const loadRecentlyViewed = async () => {
     try {
       const stored = localStorage.getItem(RECENTLY_VIEWED_KEY);
       if (!stored) {
@@ -29,26 +28,22 @@ export function RecentlyViewed({ currentProductSlug, limit = 4 }: RecentlyViewed
       }
 
       const slugs: string[] = JSON.parse(stored);
-      const products: Product[] = [];
+      const filteredSlugs = slugs
+        .filter((slug) => slug !== currentProductSlug)
+        .slice(0, limit);
 
-      for (const slug of slugs) {
-        // Skip current product
-        if (slug === currentProductSlug) {
-          continue;
-        }
-
-        const product = getProductBySlug(slug);
-        if (product) {
-          products.push(product);
-        }
-
-        // Stop when we have enough products
-        if (products.length >= limit) {
-          break;
-        }
+      if (filteredSlugs.length === 0) {
+        return;
       }
 
-      setRecentProducts(products);
+      // Fetch products from API
+      const response = await fetch(`/api/products?slugs=${filteredSlugs.join(",")}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch products");
+      }
+
+      const data = await response.json();
+      setRecentProducts(data.products || []);
     } catch (error) {
       console.error("Failed to load recently viewed products:", error);
     }

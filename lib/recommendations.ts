@@ -1,5 +1,4 @@
 import { Product } from "./types";
-import { getAllProducts } from "./products";
 import { prisma } from "./prisma";
 
 export interface RecommendationOptions {
@@ -10,13 +9,44 @@ export interface RecommendationOptions {
 }
 
 /**
+ * Helper function to fetch and transform products from database
+ */
+async function getProductsFromDatabase(): Promise<Product[]> {
+  const dbProducts = await prisma.product.findMany({
+    include: {
+      collection: {
+        select: { name: true },
+      },
+    },
+  });
+
+  return dbProducts.map((p: any) => ({
+    slug: p.slug,
+    title: p.title,
+    description: p.description,
+    price: p.price,
+    currency: p.currency,
+    collection: (p.collection?.name || "Core") as "Core" | "Lunar" | "Customizable",
+    images: (p.images as string[]) || [],
+    inStock: p.inStock,
+    featured: p.featured,
+    fabric: p.fabric,
+    care: p.care,
+    shipping: p.shipping,
+    sizes: (p.sizes as string[]) || [],
+    colors: (p.colors as string[]) || [],
+    tags: (p.tags as string[]) || [],
+  }));
+}
+
+/**
  * Get product recommendations based on various factors
  */
 export async function getRecommendations(
   options: RecommendationOptions = {}
 ): Promise<Product[]> {
   const { currentProductSlug, userId, limit = 4, collection } = options;
-  const allProducts = getAllProducts();
+  const allProducts = await getProductsFromDatabase();
 
   // Filter out current product
   let candidateProducts = allProducts.filter(
@@ -64,7 +94,7 @@ export async function getRelatedProducts(
   productSlug: string,
   limit: number = 4
 ): Promise<Product[]> {
-  const allProducts = getAllProducts();
+  const allProducts = await getProductsFromDatabase();
   const currentProduct = allProducts.find((p) => p.slug === productSlug);
 
   if (!currentProduct) {
@@ -92,7 +122,7 @@ export async function getPersonalizedRecommendations(
 ): Promise<Product[]> {
   try {
     const userBehavior = await getUserBehavior(userId);
-    const allProducts = getAllProducts();
+    const allProducts = await getProductsFromDatabase();
 
     // Score products based on user behavior
     const scoredProducts = scoreAndSortProducts(allProducts, userBehavior);
@@ -101,7 +131,8 @@ export async function getPersonalizedRecommendations(
   } catch (error) {
     console.error("Error getting personalized recommendations:", error);
     // Fallback to featured products
-    return getAllProducts().filter((p) => p.featured).slice(0, limit);
+    const allProducts = await getProductsFromDatabase();
+    return allProducts.filter((p) => p.featured).slice(0, limit);
   }
 }
 
@@ -137,7 +168,7 @@ async function getUserBehavior(userId: string) {
   });
 
   // Extract collections and colors from user behavior
-  const allProducts = getAllProducts();
+  const allProducts = await getProductsFromDatabase();
   const behaviorProducts = allProducts.filter(
     (p) =>
       purchasedSlugs.includes(p.slug) ||

@@ -1,7 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Product } from "@/lib/types";
-import { getAllProducts } from "@/lib/products";
 import { ProductCard } from "@/components/product-card";
 import { TrendingUp, ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -11,15 +11,51 @@ interface BestsellersSectionProps {
 }
 
 export function BestsellersSection({ limit = 4 }: BestsellersSectionProps) {
-  // Get products tagged as "bestseller"
-  const bestsellers = getAllProducts()
-    .filter((product) => product.tags.includes("bestseller") && product.inStock)
-    .slice(0, limit);
+  const [productsToShow, setProductsToShow] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // If no bestsellers, show featured products
-  const productsToShow = bestsellers.length > 0
-    ? bestsellers
-    : getAllProducts().filter((p) => p.featured && p.inStock).slice(0, limit);
+  useEffect(() => {
+    async function fetchBestsellers() {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/products?inStock=true");
+        if (!response.ok) {
+          throw new Error("Failed to fetch products");
+        }
+
+        const data = await response.json();
+        const allProducts: Product[] = data.products || [];
+
+        // Get products tagged as "bestseller"
+        const bestsellers = allProducts
+          .filter((product) => product.tags.includes("bestseller"))
+          .slice(0, limit);
+
+        // If no bestsellers, show featured products
+        const products = bestsellers.length > 0
+          ? bestsellers
+          : allProducts.filter((p) => p.featured).slice(0, limit);
+
+        setProductsToShow(products);
+      } catch (error) {
+        console.error("Failed to fetch bestsellers:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchBestsellers();
+  }, [limit]);
+
+  if (loading) {
+    return (
+      <section className="container mx-auto px-4 py-16">
+        <div className="flex items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-brand-orange" />
+        </div>
+      </section>
+    );
+  }
 
   if (productsToShow.length === 0) {
     return null;
