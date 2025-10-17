@@ -4,6 +4,8 @@ import {
   processPostPurchaseEmails,
 } from "@/lib/email-automation";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Cron job endpoint for processing email automation
  * Should be called via Vercel Cron or external cron service
