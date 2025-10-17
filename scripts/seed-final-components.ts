@@ -60,7 +60,7 @@ const FINAL_CONTENT = [
   { key: "sizeGuide.fit.between", value: "Between sizes? Size up for a more oversized look", section: "sizeGuide", description: "Fit point" },
   { key: "sizeGuide.fit.model", value: "Model is 6'0\" and wearing size Large", section: "sizeGuide", description: "Fit point" },
   { key: "sizeGuide.contact.text", value: "Still not sure? Contact us at", section: "sizeGuide", description: "Contact text" },
-  { key: "sizeGuide.contact.email", value: "support@wezza.com", section: "sizeGuide", description: "Contact email" },
+  { key: "sizeGuide.contact.email", value: "wezza28711@gmail.com", section: "sizeGuide", description: "Contact email" },
 
   // Stock Notification Modal (~20 strings)
   { key: "stockNotification.emailRequired", value: "Please enter your email address", section: "stockNotification", description: "Email required error" },

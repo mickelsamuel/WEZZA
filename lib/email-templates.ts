@@ -222,7 +222,7 @@ export function generateOrderConfirmationEmail(data: OrderConfirmationData): str
     <div class="footer">
       <p>
         Questions? Contact us at
-        <a href="mailto:hello@wezza.com" class="footer-link">hello@wezza.com</a>
+        <a href="mailto:wezza28711@gmail.com" class="footer-link">wezza28711@gmail.com</a>
       </p>
       <p style="margin-top: 16px;">
         <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza.com'}" class="footer-link">www.wezza.com</a>
@@ -284,7 +284,7 @@ export function generateShippingConfirmationEmail(data: ShippingConfirmationData
     <div class="footer">
       <p>
         Questions? Contact us at
-        <a href="mailto:hello@wezza.com" class="footer-link">hello@wezza.com</a>
+        <a href="mailto:wezza28711@gmail.com" class="footer-link">wezza28711@gmail.com</a>
       </p>
       <p style="margin-top: 16px;">
         <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza.com'}" class="footer-link">www.wezza.com</a>
@@ -346,7 +346,7 @@ export function generateDeliveryNotificationEmail(customerName: string, orderNum
     <div class="footer">
       <p>
         Questions? Contact us at
-        <a href="mailto:hello@wezza.com" class="footer-link">hello@wezza.com</a>
+        <a href="mailto:wezza28711@gmail.com" class="footer-link">wezza28711@gmail.com</a>
       </p>
       <p style="margin-top: 16px;">
         <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza.com'}" class="footer-link">www.wezza.com</a>

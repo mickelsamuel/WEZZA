@@ -45,7 +45,7 @@ Edit `.env` and add your API keys:
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
 RESEND_API_KEY=re_...
-RESEND_FROM_EMAIL=orders@wezza.com
+RESEND_FROM_EMAIL=wezza28711@gmail.com
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
@@ -176,4 +176,4 @@ Proprietary - All rights reserved
 
 ## Support
 
-For questions or issues, contact: hello@wezza.com
+For questions or issues, contact: wezza28711@gmail.com

@@ -3,7 +3,7 @@ import { Resend } from "resend";
 import { formatPrice } from "./currency";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "orders@wezza.com";
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "wezza28711@gmail.com";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 interface CartItem {
