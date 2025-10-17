@@ -396,7 +396,7 @@ export default function EmailTemplatesPage() {
                   className="font-mono text-sm"
                 />
                 <p className="text-xs text-gray-500">
-                  Use {{'{{'}}variableName}} for dynamic content
+                  Use {`{{variableName}}`} for dynamic content
                 </p>
               </div>
 
