@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     // SECURITY: Rate limiting to prevent upload abuse
     const userId = session.user.id || 'unknown';
-    const rateLimit = checkRateLimit(`upload:${userId}`, 20, 60000); // 20 uploads per minute
+    const rateLimit = await checkRateLimit(`upload:${userId}`, 20, 60000); // 20 uploads per minute
 
     if (!rateLimit.allowed) {
       return NextResponse.json(

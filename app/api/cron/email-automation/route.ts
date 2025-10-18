@@ -17,11 +17,21 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(req: NextRequest) {
   try {
-    // Verify cron secret (in production)
+    // SECURITY: Verify cron secret - REQUIRED for all environments
     const authHeader = req.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET;
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    // CRITICAL: CRON_SECRET must be set, otherwise endpoint is vulnerable
+    if (!cronSecret) {
+      console.error("CRON_SECRET not set - email automation endpoint is disabled for security");
+      return NextResponse.json(
+        { error: "Service unavailable - cron authentication not configured" },
+        { status: 503 }
+      );
+    }
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      console.warn("Unauthorized cron access attempt detected");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

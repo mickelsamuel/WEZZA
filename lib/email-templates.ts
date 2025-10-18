@@ -1,6 +1,8 @@
 // Email templates for WEZZA Store
 // Using inline styles for email compatibility
 
+import { escapeHtml } from './security';
+
 export interface OrderConfirmationData {
   orderNumber: string;
   customerName: string;
@@ -165,7 +167,7 @@ export function generateOrderConfirmationEmail(data: OrderConfirmationData): str
       <h1 class="title">Order Confirmed!</h1>
 
       <p class="text">
-        Hey ${data.customerName},
+        Hey ${escapeHtml(data.customerName)},
       </p>
 
       <p class="text">
@@ -173,16 +175,16 @@ export function generateOrderConfirmationEmail(data: OrderConfirmationData): str
       </p>
 
       <p class="text">
-        <strong>Order Number:</strong> #${data.orderNumber}
+        <strong>Order Number:</strong> #${escapeHtml(data.orderNumber)}
       </p>
 
       <div class="order-details">
         <h2 style="margin: 0 0 16px 0; font-size: 18px;">Order Items</h2>
         ${data.items.map(item => `
           <div class="order-item">
-            <div class="item-name">${item.title}</div>
+            <div class="item-name">${escapeHtml(item.title)}</div>
             <div class="item-details">
-              Size: ${item.size} • Quantity: ${item.quantity} • $${(item.price / 100).toFixed(2)} CAD
+              Size: ${escapeHtml(item.size)} • Quantity: ${item.quantity} • $${(item.price / 100).toFixed(2)} CAD
             </div>
           </div>
         `).join('')}
@@ -206,9 +208,9 @@ export function generateOrderConfirmationEmail(data: OrderConfirmationData): str
       <div style="margin: 24px 0;">
         <h3 style="font-size: 16px; margin: 0 0 8px 0;">Shipping Address</h3>
         <p class="text" style="margin: 0;">
-          ${data.shippingAddress.street}<br>
-          ${data.shippingAddress.city}, ${data.shippingAddress.province} ${data.shippingAddress.postalCode}<br>
-          ${data.shippingAddress.country}
+          ${escapeHtml(data.shippingAddress.street)}<br>
+          ${escapeHtml(data.shippingAddress.city)}, ${escapeHtml(data.shippingAddress.province)} ${escapeHtml(data.shippingAddress.postalCode)}<br>
+          ${escapeHtml(data.shippingAddress.country)}
         </p>
       </div>
 
@@ -253,21 +255,21 @@ export function generateShippingConfirmationEmail(data: ShippingConfirmationData
       <h1 class="title">Your Order Has Shipped!</h1>
 
       <p class="text">
-        Hey ${data.customerName},
+        Hey ${escapeHtml(data.customerName)},
       </p>
 
       <p class="text">
-        Great news! Your WEZZA order is on its way. ${data.estimatedDelivery ? `It should arrive by ${data.estimatedDelivery}.` : ''}
+        Great news! Your WEZZA order is on its way. ${data.estimatedDelivery ? `It should arrive by ${escapeHtml(data.estimatedDelivery)}.` : ''}
       </p>
 
       <p class="text">
-        <strong>Order Number:</strong> #${data.orderNumber}
+        <strong>Order Number:</strong> #${escapeHtml(data.orderNumber)}
       </p>
 
       <div class="tracking-box">
         <p style="margin: 0 0 12px 0; font-size: 14px; color: #666666;">Tracking Number</p>
-        <div class="tracking-number">${data.trackingNumber}</div>
-        <p style="margin: 12px 0 0 0; font-size: 14px; color: #666666;">Carrier: ${data.carrier}</p>
+        <div class="tracking-number">${escapeHtml(data.trackingNumber)}</div>
+        <p style="margin: 12px 0 0 0; font-size: 14px; color: #666666;">Carrier: ${escapeHtml(data.carrier)}</p>
       </div>
 
       <center>

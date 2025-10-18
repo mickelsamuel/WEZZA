@@ -68,9 +68,9 @@ async function checkRateLimitRedis(
 
     if (count >= maxRequests) {
       // Get the oldest request to calculate reset time
-      const oldestRequests = await redis!.zrange(redisKey, 0, 0, { withScores: true });
+      const oldestRequests = await redis!.zrange(redisKey, 0, 0, { withScores: true }) as Array<{ member: string; score: number }>;
       const resetAt = oldestRequests.length > 0
-        ? (oldestRequests[0].score as number) + windowMs
+        ? oldestRequests[0].score + windowMs
         : now + windowMs;
 
       return {
@@ -177,9 +177,9 @@ export async function getRateLimitStatus(
       const count = await redis.zcard(redisKey);
 
       // Get reset time
-      const oldestRequests = await redis.zrange(redisKey, 0, 0, { withScores: true });
+      const oldestRequests = await redis.zrange(redisKey, 0, 0, { withScores: true }) as Array<{ member: string; score: number }>;
       const resetAt = oldestRequests.length > 0
-        ? (oldestRequests[0].score as number) + windowMs
+        ? oldestRequests[0].score + windowMs
         : now + windowMs;
 
       return {

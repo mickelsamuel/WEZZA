@@ -370,7 +370,7 @@ export async function analyzePasswordStrength(password: string, userInputs: stri
     warning: string;
     suggestions: string[];
   };
-  crackTime: string;
+  crackTime: string | number;
 }> {
   try {
     const zxcvbn = (await import('zxcvbn')).default;

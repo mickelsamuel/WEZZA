@@ -97,6 +97,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   try {
     console.log("Processing checkout.session.completed:", session.id);
 
+    // SECURITY: Idempotency check - prevent duplicate order creation
+    const existingOrder = await prisma.order.findUnique({
+      where: { stripeSessionId: session.id },
+    });
+
+    if (existingOrder) {
+      console.log("Order already exists for session:", session.id);
+      return; // Webhook already processed
+    }
+
     // Retrieve full session details with line items
     const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
       expand: ["line_items", "line_items.data.price.product"],

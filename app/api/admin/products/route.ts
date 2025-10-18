@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isAdmin, getSafeErrorMessage, logError } from "@/lib/security";
 
 // GET /api/admin/products - Get all products or filter by slug (admin only)
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== "admin") {
+    // SECURITY: Check admin role (case-insensitive)
+    if (!session || !isAdmin(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -65,7 +67,8 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== "admin") {
+    // SECURITY: Check admin role (case-insensitive)
+    if (!session || !isAdmin(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -88,17 +91,84 @@ export async function POST(request: NextRequest) {
       tags,
     } = body;
 
+    // SECURITY: Comprehensive input validation
     // Validate required fields
     if (!slug || !title || !description || price === undefined) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Validate slug format
+    // Validate slug format and length
     if (!/^[a-z0-9-]+$/.test(slug)) {
       return NextResponse.json(
         { error: "Slug must contain only lowercase letters, numbers, and hyphens" },
         { status: 400 }
       );
+    }
+
+    if (slug.length > 100) {
+      return NextResponse.json(
+        { error: "Slug must be less than 100 characters" },
+        { status: 400 }
+      );
+    }
+
+    // Validate title length
+    if (title.length > 255) {
+      return NextResponse.json(
+        { error: "Title must be less than 255 characters" },
+        { status: 400 }
+      );
+    }
+
+    // Validate description length
+    if (description.length > 10000) {
+      return NextResponse.json(
+        { error: "Description must be less than 10,000 characters" },
+        { status: 400 }
+      );
+    }
+
+    // Validate price
+    if (typeof price !== 'number' || price <= 0 || price > 99999999) {
+      return NextResponse.json(
+        { error: "Price must be a positive number less than 999,999.99" },
+        { status: 400 }
+      );
+    }
+
+    // Validate images array
+    if (images && (!Array.isArray(images) || images.length === 0)) {
+      return NextResponse.json(
+        { error: "At least one image is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate that all images are valid URLs
+    if (images && Array.isArray(images)) {
+      for (const imageUrl of images) {
+        try {
+          new URL(imageUrl);
+        } catch {
+          return NextResponse.json(
+            { error: `Invalid image URL: ${imageUrl}` },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
+    // Validate arrays if provided
+    if (sizes && !Array.isArray(sizes)) {
+      return NextResponse.json({ error: "Sizes must be an array" }, { status: 400 });
+    }
+
+    if (colors && !Array.isArray(colors)) {
+      return NextResponse.json({ error: "Colors must be an array" }, { status: 400 });
+    }
+
+    if (tags && !Array.isArray(tags)) {
+      return NextResponse.json({ error: "Tags must be an array" }, { status: 400 });
     }
 
     // Check if slug already exists

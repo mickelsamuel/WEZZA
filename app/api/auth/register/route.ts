@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   try {
     // SECURITY: Rate limiting to prevent spam registrations
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-    const rateLimit = checkRateLimit(`register:${ip}`, 3, 3600000); // 3 registrations per hour
+    const rateLimit = await checkRateLimit(`register:${ip}`, 3, 3600000); // 3 registrations per hour
 
     if (!rateLimit.allowed) {
       return NextResponse.json(
