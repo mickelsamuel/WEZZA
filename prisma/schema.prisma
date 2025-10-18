@@ -62,47 +62,49 @@ model User {
 
   // Security fields
   twoFactorSecret    String? // TOTP secret for 2FA (encrypted)
-  twoFactorEnabled   Boolean @default(false)
+  twoFactorEnabled   Boolean   @default(false)
   passwordChangedAt  DateTime? // Last password change timestamp
   accountLockedUntil DateTime? // Account lockout expiry
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  accounts            Account[]
-  sessions            Session[]
-  orders              Order[]
-  addresses           Address[]
-  reviews             Review[]
-  wishlist            Wishlist[]
-  cart                Cart?
-  returnRequests      ReturnRequest[]
-  stockNotifications  StockNotification[]
-  savedPaymentMethods SavedPaymentMethod[]
-  sizingProfile       UserSizingProfile?
+  accounts              Account[]
+  sessions              Session[]
+  orders                Order[]
+  addresses             Address[]
+  reviews               Review[]
+  wishlist              Wishlist[]
+  cart                  Cart?
+  returnRequests        ReturnRequest[]
+  stockNotifications    StockNotification[]
+  savedPaymentMethods   SavedPaymentMethod[]
+  sizingProfile         UserSizingProfile?
   productCollaborations ProductCollaborator[]
 
   @@index([email])
   @@index([role])
+  @@index([accountLockedUntil]) // For quickly checking locked accounts
+  @@index([twoFactorEnabled]) // For 2FA status queries
 }
 
 // Order model
 model Order {
-  id                String   @id @default(cuid())
-  userId            String?
-  stripeSessionId   String   @unique
-  status            String   @default("pending") // pending, processing, shipped, delivered, completed, cancelled
-  total             Int // in cents
-  currency          String   @default("CAD")
-  items             Json // Array of cart items with product details
-  shippingAddress   Json // Address object
-  customerEmail     String
-  customerName      String
-  trackingNumber    String? // Shipping tracking number
-  carrier           String? // "Canada Post", "UPS", "FedEx", etc.
-  statusHistory     Json[] // Array of {status, timestamp, note}
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String?
+  stripeSessionId String   @unique
+  status          String   @default("pending") // pending, processing, shipped, delivered, completed, cancelled
+  total           Int // in cents
+  currency        String   @default("CAD")
+  items           Json // Array of cart items with product details
+  shippingAddress Json // Address object
+  customerEmail   String
+  customerName    String
+  trackingNumber  String? // Shipping tracking number
+  carrier         String? // "Canada Post", "UPS", "FedEx", etc.
+  statusHistory   Json[] // Array of {status, timestamp, note}
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   user           User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
   returnRequests ReturnRequest[]
@@ -112,6 +114,7 @@ model Order {
   @@index([customerEmail])
   @@index([createdAt])
   @@index([status])
+  @@index([status, createdAt]) // Compound index for admin dashboard queries
 }
 
 // Address model for saved addresses
@@ -184,7 +187,7 @@ model Cart {
 model ProductInventory {
   id                String   @id @default(cuid())
   productSlug       String   @unique
-  sizeQuantities    Json     // {S: 10, M: 15, L: 8, XL: 12, XXL: 5}
+  sizeQuantities    Json // {S: 10, M: 15, L: 8, XL: 12, XXL: 5}
   lowStockThreshold Int      @default(5)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -231,32 +234,32 @@ model SearchHistory {
 
 // Email automation models
 model EmailSubscription {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  subscribed    Boolean  @default(true)
-  source        String? // "checkout", "newsletter", "account"
-  unsubscribeToken String @unique @default(cuid())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id               String   @id @default(cuid())
+  email            String   @unique
+  subscribed       Boolean  @default(true)
+  source           String? // "checkout", "newsletter", "account"
+  unsubscribeToken String   @unique @default(cuid())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@index([email])
   @@index([subscribed])
 }
 
 model EmailCampaign {
-  id              String   @id @default(cuid())
-  type            String // "welcome", "cart_abandonment", "post_purchase", "newsletter"
-  subject         String
-  htmlContent     String   @db.Text
-  textContent     String?  @db.Text
-  status          String   @default("draft") // "draft", "scheduled", "sent", "cancelled"
-  scheduledFor    DateTime?
-  sentAt          DateTime?
-  recipientCount  Int      @default(0)
-  openCount       Int      @default(0)
-  clickCount      Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String    @id @default(cuid())
+  type           String // "welcome", "cart_abandonment", "post_purchase", "newsletter"
+  subject        String
+  htmlContent    String    @db.Text
+  textContent    String?   @db.Text
+  status         String    @default("draft") // "draft", "scheduled", "sent", "cancelled"
+  scheduledFor   DateTime?
+  sentAt         DateTime?
+  recipientCount Int       @default(0)
+  openCount      Int       @default(0)
+  clickCount     Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@index([type])
   @@index([status])
@@ -264,38 +267,40 @@ model EmailCampaign {
 }
 
 model EmailLog {
-  id            String   @id @default(cuid())
-  userId        String?
-  email         String
-  campaignId    String?
-  type          String // "welcome", "cart_abandonment", "order_confirmation", etc.
-  subject       String
-  status        String   @default("pending") // "pending", "sent", "failed", "opened", "clicked"
-  errorMessage  String?  @db.Text
-  metadata      Json? // Additional data like order ID, cart contents, etc.
-  sentAt        DateTime?
-  openedAt      DateTime?
-  clickedAt     DateTime?
-  createdAt     DateTime @default(now())
+  id           String    @id @default(cuid())
+  userId       String?
+  email        String
+  campaignId   String?
+  type         String // "welcome", "cart_abandonment", "order_confirmation", etc.
+  subject      String
+  status       String    @default("pending") // "pending", "sent", "failed", "opened", "clicked"
+  errorMessage String?   @db.Text
+  metadata     Json? // Additional data like order ID, cart contents, etc.
+  sentAt       DateTime?
+  openedAt     DateTime?
+  clickedAt    DateTime?
+  createdAt    DateTime  @default(now())
 
   @@index([userId])
   @@index([email])
   @@index([type])
   @@index([status])
   @@index([createdAt])
+  @@index([type, createdAt]) // Compound index for email analytics
+  @@index([status, createdAt]) // Compound index for email delivery monitoring
 }
 
 model CartAbandonment {
-  id        String   @id @default(cuid())
-  userId    String?
-  email     String
-  cartItems Json // Cart contents
-  cartTotal Int // Total in cents
-  reminderSent Boolean @default(false)
-  recovered Boolean @default(false)
+  id               String   @id @default(cuid())
+  userId           String?
+  email            String
+  cartItems        Json // Cart contents
+  cartTotal        Int // Total in cents
+  reminderSent     Boolean  @default(false)
+  recovered        Boolean  @default(false)
   recoveredOrderId String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@index([userId])
   @@index([email])
@@ -305,15 +310,15 @@ model CartAbandonment {
 
 // Stock notification and waitlist
 model StockNotification {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String?
   email       String
   productSlug String
   size        String
-  notified    Boolean  @default(false)
+  notified    Boolean   @default(false)
   notifiedAt  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -327,17 +332,17 @@ model StockNotification {
 
 // Saved payment methods (Stripe)
 model SavedPaymentMethod {
-  id                   String   @id @default(cuid())
-  userId               String
-  stripePaymentMethodId String  @unique
-  type                 String // "card"
-  cardBrand            String? // "visa", "mastercard", etc.
-  cardLast4            String?
-  cardExpMonth         Int?
-  cardExpYear          Int?
-  isDefault            Boolean  @default(false)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  userId                String
+  stripePaymentMethodId String   @unique
+  type                  String // "card"
+  cardBrand             String? // "visa", "mastercard", etc.
+  cardLast4             String?
+  cardExpMonth          Int?
+  cardExpYear           Int?
+  isDefault             Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -364,15 +369,15 @@ model UserSizingProfile {
 
 // Collections for organizing products
 model Collection {
-  id          String    @id @default(cuid())
-  slug        String    @unique
+  id          String   @id @default(cuid())
+  slug        String   @unique
   name        String
-  description String?   @db.Text
+  description String?  @db.Text
   imageUrl    String?
-  featured    Boolean   @default(false)
-  sortOrder   Int       @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  featured    Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   products Product[]
 
@@ -383,34 +388,34 @@ model Collection {
 
 // Product model for full database control
 model Product {
-  id           String   @id @default(cuid())
-  slug         String   @unique
+  id           String  @id @default(cuid())
+  slug         String  @unique
   title        String
-  description  String   @db.Text
+  description  String  @db.Text
   price        Int // in cents
-  currency     String   @default("CAD")
+  currency     String  @default("CAD")
   collectionId String?
-  inStock      Boolean  @default(true)
-  featured     Boolean  @default(false)
+  inStock      Boolean @default(true)
+  featured     Boolean @default(false)
 
   // Product images - array of image URLs
-  images       Json // ["url1", "url2", "url3"]
+  images Json // ["url1", "url2", "url3"]
 
   // Product details
-  fabric       String   @db.Text
-  care         String   @db.Text
-  shipping     String   @db.Text
+  fabric   String @db.Text
+  care     String @db.Text
+  shipping String @db.Text
 
   // Variants
-  sizes        Json // ["S", "M", "L", "XL", "XXL"]
-  colors       Json // ["black", "white", "gray"]
-  tags         Json // ["bestseller", "new-arrival"]
+  sizes  Json // ["S", "M", "L", "XL", "XXL"]
+  colors Json // ["black", "white", "gray"]
+  tags   Json // ["bestseller", "new-arrival"]
 
   // Timestamps
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  collection Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  collection    Collection?           @relation(fields: [collectionId], references: [id], onDelete: SetNull)
   collaborators ProductCollaborator[]
 
   @@index([slug])
@@ -502,15 +507,18 @@ model AuditLog {
   @@index([resource])
   @@index([severity])
   @@index([createdAt])
+  @@index([severity, createdAt]) // Compound index for security monitoring queries
+  @@index([action, createdAt]) // Compound index for action-based analytics
 }
 
 // Password history for preventing password reuse
 model PasswordHistory {
-  id             String   @id @default(cuid())
-  userId         String
-  passwordHash   String
-  createdAt      DateTime @default(now())
+  id           String   @id @default(cuid())
+  userId       String
+  passwordHash String
+  createdAt    DateTime @default(now())
 
   @@index([userId])
   @@index([createdAt])
+  @@index([userId, createdAt]) // Compound index for password reuse checking
 }

@@ -3,6 +3,12 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
+import {
+  isAccountLocked,
+  lockAccount,
+  trackFailedLogin,
+  clearFailedLoginAttempts,
+} from "./security";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -18,6 +24,17 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
+        // SECURITY: Check if account is locked
+        const lockedUntil = await isAccountLocked(credentials.email);
+        if (lockedUntil) {
+          const minutesRemaining = Math.ceil(
+            (lockedUntil.getTime() - Date.now()) / 60000
+          );
+          throw new Error(
+            `Account is locked due to too many failed login attempts. Please try again in ${minutesRemaining} minute${minutesRemaining !== 1 ? 's' : ''}.`
+          );
+        }
+
         const user = await prisma.user.findUnique({
           where: {
             email: credentials.email
@@ -25,6 +42,14 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user || !user.password) {
+          // SECURITY: Track failed login attempt (even for non-existent users to prevent enumeration)
+          const loginTrack = trackFailedLogin(credentials.email);
+          if (loginTrack.shouldLock) {
+            // Only lock if user exists
+            if (user) {
+              await lockAccount(credentials.email);
+            }
+          }
           throw new Error("Invalid credentials");
         }
 
@@ -34,8 +59,19 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!isCorrectPassword) {
+          // SECURITY: Track failed login attempt
+          const loginTrack = trackFailedLogin(credentials.email);
+          if (loginTrack.shouldLock) {
+            await lockAccount(credentials.email);
+            throw new Error(
+              "Account has been locked due to too many failed login attempts. Please try again in 15 minutes."
+            );
+          }
           throw new Error("Invalid credentials");
         }
+
+        // SECURITY: Clear failed login attempts on successful login
+        clearFailedLoginAttempts(credentials.email);
 
         return {
           id: user.id,

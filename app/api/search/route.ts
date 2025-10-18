@@ -3,11 +3,26 @@ import { searchProducts, getSearchSuggestions } from "@/lib/search";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Rate limiting to prevent search abuse/scraping
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const rateLimitMax = 30;
+    const rateLimitWindow = 60000; // 30 searches per minute
+    const rateLimit = await checkRateLimit(`search:${ip}`, rateLimitMax, rateLimitWindow);
+
+    if (!rateLimit.allowed) {
+      const headers = getRateLimitHeaders(rateLimitMax, rateLimit.remaining, rateLimit.resetAt!);
+      return NextResponse.json(
+        { error: "Too many search requests. Please slow down." },
+        { status: 429, headers }
+      );
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get("q");
     const type = searchParams.get("type"); // "search" or "suggestions"
@@ -19,7 +34,8 @@ export async function GET(request: NextRequest) {
     // Get suggestions
     if (type === "suggestions") {
       const suggestions = await getSearchSuggestions(query);
-      return NextResponse.json({ suggestions });
+      const headers = getRateLimitHeaders(rateLimitMax, rateLimit.remaining, rateLimit.resetAt!);
+      return NextResponse.json({ suggestions }, { headers });
     }
 
     // Perform search
@@ -40,6 +56,9 @@ export async function GET(request: NextRequest) {
       console.error("Failed to log search:", error);
     }
 
+    // Include rate limit headers in successful response
+    const headers = getRateLimitHeaders(rateLimitMax, rateLimit.remaining, rateLimit.resetAt!);
+
     return NextResponse.json({
       query,
       results: results.map((r) => ({
@@ -48,7 +67,7 @@ export async function GET(request: NextRequest) {
         matchedIn: r.matchedIn,
       })),
       count: results.length,
-    });
+    }, { headers });
   } catch (error) {
     console.error("Search error:", error);
     return NextResponse.json(

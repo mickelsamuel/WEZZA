@@ -9,18 +9,21 @@ import {
   logError,
   checkPasswordBreach
 } from "@/lib/security";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
     // SECURITY: Rate limiting to prevent spam registrations
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-    const rateLimit = await checkRateLimit(`register:${ip}`, 3, 3600000); // 3 registrations per hour
+    const rateLimitMax = 3;
+    const rateLimitWindow = 3600000; // 1 hour
+    const rateLimit = await checkRateLimit(`register:${ip}`, rateLimitMax, rateLimitWindow);
 
     if (!rateLimit.allowed) {
+      const headers = getRateLimitHeaders(rateLimitMax, rateLimit.remaining, rateLimit.resetAt!);
       return NextResponse.json(
         { error: "Too many registration attempts. Please try again later." },
-        { status: 429 }
+        { status: 429, headers }
       );
     }
 
@@ -132,12 +135,15 @@ export async function POST(request: NextRequest) {
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
+    // Include rate limit headers in successful response
+    const headers = getRateLimitHeaders(rateLimitMax, rateLimit.remaining, rateLimit.resetAt!);
+
     return NextResponse.json(
       {
         message: "User created successfully",
         user: userWithoutPassword
       },
-      { status: 201 }
+      { status: 201, headers }
     );
   } catch (error) {
     logError(error, 'auth/register');

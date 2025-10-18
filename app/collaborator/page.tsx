@@ -40,6 +40,26 @@ export default async function CollaboratorDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Collaborator Header */}
+      <header className="bg-black text-white shadow-sm">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link href="/" className="text-xl font-bold">
+                WEZZA
+              </Link>
+              <span className="text-sm text-gray-400">/ Collaborator</span>
+            </div>
+            <Link
+              href="/"
+              className="text-sm hover:text-brand-orange transition-colors"
+            >
+              Back to Store
+            </Link>
+          </div>
+        </div>
+      </header>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="mb-8">

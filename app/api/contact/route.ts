@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resend, FROM_EMAIL } from "@/lib/email";
 import { escapeHtml, sanitizeEmail, sanitizeText, sanitizeUrl, getSafeErrorMessage, logError } from "@/lib/security";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -18,12 +18,15 @@ export async function POST(request: NextRequest) {
   try {
     // SECURITY: Rate limiting to prevent spam
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-    const rateLimit = await checkRateLimit(`contact:${ip}`, 3, 300000); // 3 requests per 5 minutes
+    const rateLimitMax = 3;
+    const rateLimitWindow = 300000; // 5 minutes
+    const rateLimit = await checkRateLimit(`contact:${ip}`, rateLimitMax, rateLimitWindow);
 
     if (!rateLimit.allowed) {
+      const headers = getRateLimitHeaders(rateLimitMax, rateLimit.remaining, rateLimit.resetAt!);
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
-        { status: 429 }
+        { status: 429, headers }
       );
     }
 
@@ -116,9 +119,13 @@ export async function POST(request: NextRequest) {
       html: emailHtml,
     });
 
-    return NextResponse.json({
-      message: "Custom order request submitted successfully",
-    });
+    // Include rate limit headers in successful response
+    const headers = getRateLimitHeaders(rateLimitMax, rateLimit.remaining, rateLimit.resetAt!);
+
+    return NextResponse.json(
+      { message: "Custom order request submitted successfully" },
+      { headers }
+    );
   } catch (error) {
     logError(error, 'contact/route');
     return NextResponse.json(

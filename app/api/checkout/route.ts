@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -12,6 +13,20 @@ interface CheckoutItem {
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Rate limiting to prevent checkout abuse
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const rateLimitMax = 5;
+    const rateLimitWindow = 300000; // 5 checkouts per 5 minutes
+    const rateLimit = await checkRateLimit(`checkout:${ip}`, rateLimitMax, rateLimitWindow);
+
+    if (!rateLimit.allowed) {
+      const headers = getRateLimitHeaders(rateLimitMax, rateLimit.remaining, rateLimit.resetAt!);
+      return NextResponse.json(
+        { error: "Too many checkout attempts. Please try again later." },
+        { status: 429, headers }
+      );
+    }
+
     const { items }: { items: CheckoutItem[] } = await request.json();
 
     if (!items || items.length === 0) {

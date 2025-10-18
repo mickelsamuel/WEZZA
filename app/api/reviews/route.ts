@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
 // GET - Fetch reviews for a product
 export async function GET(request: Request) {
@@ -56,8 +57,22 @@ export async function GET(request: Request) {
 }
 
 // POST - Create a new review
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Rate limiting to prevent review spam
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const rateLimitMax = 3;
+    const rateLimitWindow = 3600000; // 3 reviews per hour
+    const rateLimit = await checkRateLimit(`review:${ip}`, rateLimitMax, rateLimitWindow);
+
+    if (!rateLimit.allowed) {
+      const headers = getRateLimitHeaders(rateLimitMax, rateLimit.remaining, rateLimit.resetAt!);
+      return NextResponse.json(
+        { error: "Too many review submissions. Please try again later." },
+        { status: 429, headers }
+      );
+    }
+
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
@@ -117,7 +132,10 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ review }, { status: 201 });
+    // Include rate limit headers in successful response
+    const headers = getRateLimitHeaders(rateLimitMax, rateLimit.remaining, rateLimit.resetAt!);
+
+    return NextResponse.json({ review }, { status: 201, headers });
   } catch (error) {
     console.error("Failed to create review:", error);
     return NextResponse.json(

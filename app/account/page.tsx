@@ -8,8 +8,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { ArrowRight, Package, ShoppingBag, User, LogOut, Calendar, MapPin, Plus, Edit, Trash2 } from "lucide-react";
+import { ArrowRight, Package, ShoppingBag, User, LogOut, Calendar, MapPin, Plus, Edit, Trash2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Address {
   id: string;
@@ -31,6 +42,7 @@ export default function AccountPage() {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [content, setContent] = useState<Record<string, string>>({});
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [addressForm, setAddressForm] = useState({
     name: "",
     street: "",
@@ -93,6 +105,29 @@ export default function AccountPage() {
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeletingAccount(true);
+    try {
+      const response = await fetch("/api/account/delete", {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete account");
+      }
+
+      toast.success("Account deleted successfully");
+
+      // Sign out and redirect to home
+      await signOut({ callbackUrl: "/" });
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete account");
+      setIsDeletingAccount(false);
+    }
   };
 
   const handleSaveAddress = async (e: React.FormEvent) => {
@@ -508,6 +543,71 @@ export default function AccountPage() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Danger Zone - Delete Account */}
+        <div className="bg-red-500/10 backdrop-blur-lg rounded-2xl border border-red-500/30 p-8">
+          <div className="flex items-center gap-3 mb-4">
+            <AlertTriangle className="h-6 w-6 text-red-400" />
+            <h2 className="text-2xl font-bold text-white">Danger Zone</h2>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <p className="text-white/80 text-sm mb-4">
+                Once you delete your account, there is no going back. This action will permanently delete:
+              </p>
+              <ul className="text-white/60 text-sm space-y-2 ml-6 list-disc">
+                <li>Your account information and profile</li>
+                <li>All order history and purchase records</li>
+                <li>Saved addresses and payment methods</li>
+                <li>Wishlist and cart items</li>
+                <li>Product reviews and ratings</li>
+              </ul>
+            </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                  disabled={isDeletingAccount}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {isDeletingAccount ? "Deleting..." : "Delete My Account"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-gray-900 border-red-500/30">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-white text-xl">
+                    Are you absolutely sure?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-white/70">
+                    <span className="block mb-4">
+                      This action cannot be undone. This will permanently delete your account
+                      and remove all your data from our servers, including:
+                    </span>
+                    <ul className="space-y-2 list-disc ml-6">
+                      <li>All order history ({orders.length} orders)</li>
+                      <li>Saved addresses ({addresses.length} addresses)</li>
+                      <li>Payment methods and preferences</li>
+                      <li>Reviews, ratings, and wishlist</li>
+                    </ul>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="bg-white/10 text-white border-white/20 hover:bg-white/20">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    disabled={isDeletingAccount}
+                  >
+                    {isDeletingAccount ? "Deleting..." : "Yes, delete my account"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </div>
     </div>

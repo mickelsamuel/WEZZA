@@ -71,17 +71,36 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
+              // Scripts: Next.js requires 'unsafe-eval' and 'unsafe-inline' in dev, Stripe needs its domains
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://checkout.stripe.com",
+              // Styles: 'unsafe-inline' needed for CSS-in-JS and component styles
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "img-src 'self' data: blob: https: http:",
+              // Images: Allow data URIs for QR codes, blob for canvas, https for CDNs (limit http: for security)
+              "img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com",
+              // Fonts: Google Fonts + data URIs
               "font-src 'self' data: https://fonts.gstatic.com",
+              // API connections: Stripe, Cloudinary, password breach checking
               "connect-src 'self' https://api.stripe.com https://checkout.stripe.com https://res.cloudinary.com https://api.cloudinary.com https://api.pwnedpasswords.com",
+              // Frames: Only Stripe checkout
               "frame-src 'self' https://js.stripe.com https://checkout.stripe.com",
+              // Media: No media sources allowed
+              "media-src 'none'",
+              // Objects/Embeds: No plugins allowed (Flash, Java, etc.)
               "object-src 'none'",
+              // Web Workers: Only from same origin
+              "worker-src 'self' blob:",
+              // Manifests: Only from same origin
+              "manifest-src 'self'",
+              // Base URI: Prevent injection of <base> tags
               "base-uri 'self'",
+              // Form submissions: Only to same origin
               "form-action 'self'",
+              // Framing: Only allow same origin (clickjacking protection)
               "frame-ancestors 'self'",
-              "upgrade-insecure-requests"
+              // Upgrade all HTTP to HTTPS
+              "upgrade-insecure-requests",
+              // Block all mixed content
+              "block-all-mixed-content",
             ].join('; ')
           },
         ],

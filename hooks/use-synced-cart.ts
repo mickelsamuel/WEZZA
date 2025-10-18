@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useCartStore } from "@/store/cart";
 import { CartItem } from "@/lib/types";
@@ -10,10 +10,25 @@ import { CartItem } from "@/lib/types";
  * - Loads cart from DB on login
  * - Syncs cart changes to DB for authenticated users
  * - Falls back to localStorage for guests
+ * - Clears cart when user changes or logs out
  */
 export function useSyncedCart() {
   const { data: session, status } = useSession();
   const cart = useCartStore();
+  const previousUserIdRef = useRef<string | null>(null);
+
+  // Handle user changes and logout - clear cart when user changes
+  useEffect(() => {
+    const currentUserId = session?.user?.id || null;
+
+    // If user changed (including logout), clear the cart
+    if (previousUserIdRef.current !== null && previousUserIdRef.current !== currentUserId) {
+      cart.clearCart();
+    }
+
+    // Update the previous user ID
+    previousUserIdRef.current = currentUserId;
+  }, [session?.user?.id]);
 
   // Load cart from database when user logs in
   useEffect(() => {
@@ -35,40 +50,15 @@ export function useSyncedCart() {
       if (response.ok) {
         const { cart: dbCart } = await response.json();
         if (dbCart && dbCart.items) {
-          // Merge local cart with database cart
-          const localItems: CartItem[] = cart.items;
+          // Use ONLY database cart for logged-in users
+          // This prevents cart contamination from previous users in localStorage
           const dbItems: CartItem[] = dbCart.items;
 
-          // Create a map to merge items
-          const mergedItemsMap = new Map<string, CartItem>();
-
-          // Add local items
-          localItems.forEach((item) => {
-            const key = `${item.product.slug}-${item.size}`;
-            mergedItemsMap.set(key, item);
-          });
-
-          // Merge with database items (db items take precedence for quantity)
-          dbItems.forEach((item) => {
-            const key = `${item.product.slug}-${item.size}`;
-            const existing = mergedItemsMap.get(key);
-            if (existing) {
-              // Keep the higher quantity
-              mergedItemsMap.set(key, {
-                ...item,
-                quantity: Math.max(existing.quantity, item.quantity),
-              });
-            } else {
-              mergedItemsMap.set(key, item);
-            }
-          });
-
-          // Update local cart with merged items
-          const mergedItems = Array.from(mergedItemsMap.values());
-          useCartStore.setState({ items: mergedItems });
-
-          // Sync merged cart back to database
-          await syncCartToDatabase(mergedItems);
+          // Replace local cart with database cart
+          useCartStore.setState({ items: dbItems });
+        } else {
+          // No cart in database, clear local cart
+          useCartStore.setState({ items: [] });
         }
       }
     } catch (error) {

@@ -574,6 +574,50 @@ export function clearFailedLoginAttempts(identifier: string): void {
 }
 
 /**
+ * Check if an account is currently locked
+ * Returns null if not locked, or the Date when it will be unlocked
+ */
+export async function isAccountLocked(email: string): Promise<Date | null> {
+  const { prisma } = await import('./prisma');
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { accountLockedUntil: true },
+  });
+
+  if (!user || !user.accountLockedUntil) {
+    return null;
+  }
+
+  const now = new Date();
+  if (user.accountLockedUntil > now) {
+    return user.accountLockedUntil;
+  }
+
+  return null;
+}
+
+/**
+ * Lock an account until a specific time
+ */
+export async function lockAccount(email: string, durationMs: number = 15 * 60 * 1000): Promise<void> {
+  const { prisma } = await import('./prisma');
+
+  const lockUntil = new Date(Date.now() + durationMs);
+
+  await prisma.user.update({
+    where: { email },
+    data: { accountLockedUntil: lockUntil },
+  });
+
+  logSecurityEvent({
+    type: SecurityEventType.ACCOUNT_LOCKED,
+    email,
+    metadata: { lockedUntil: lockUntil.toISOString() },
+  });
+}
+
+/**
  * Clean up expired failed login records
  */
 if (typeof setInterval !== 'undefined') {

@@ -1,13 +1,26 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { createCsrfProtect } from '@edge-csrf/nextjs';
 
 /**
  * Next.js Middleware for Security Features
  *
  * Features:
- * 1. IP Whitelisting for admin routes (optional)
- * 2. Additional security headers
+ * 1. CSRF Protection for state-changing requests
+ * 2. IP Whitelisting for admin routes (optional)
+ * 3. Additional security headers
  */
+
+// Initialize CSRF protection
+const csrfProtect = createCsrfProtect({
+  cookie: {
+    name: '__Host-csrf-token',
+    path: '/',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  },
+});
 
 // IP Whitelist configuration (optional - disabled if not set)
 const ADMIN_IP_WHITELIST = process.env.ADMIN_IP_WHITELIST
@@ -68,8 +81,47 @@ function isIpWhitelisted(ip: string): boolean {
   return false;
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  let response = NextResponse.next();
+
+  // CSRF Protection for state-changing requests (POST, PUT, DELETE, PATCH)
+  // Skip CSRF for:
+  // - GET, HEAD, OPTIONS requests (safe methods)
+  // - Webhook endpoints (they use signature verification)
+  // - NextAuth endpoints (they have their own CSRF protection)
+  // - Cart endpoints (require authentication, user-specific)
+  // - Admin API endpoints (protected by auth + role checks + optional IP whitelist)
+  // - Account endpoints (require authentication, user-specific)
+  // - Checkout endpoints (authenticated, Stripe-secured)
+  const method = request.method;
+  const isStateChanging = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method);
+  const isWebhook = pathname.startsWith('/api/webhooks/');
+  const isNextAuth = pathname.startsWith('/api/auth/');
+  const isCart = pathname.startsWith('/api/cart');
+  const isAdminApi = pathname.startsWith('/api/admin/');
+  const isAccountApi = pathname.startsWith('/api/account/');
+  const isCheckout = pathname.startsWith('/api/checkout');
+
+  if (isStateChanging && !isWebhook && !isNextAuth && !isCart && !isAdminApi && !isAccountApi && !isCheckout) {
+    try {
+      await csrfProtect(request, response);
+    } catch (error) {
+      console.warn(`[SECURITY] CSRF validation failed for ${pathname}`);
+      return new NextResponse(
+        JSON.stringify({
+          error: 'Invalid CSRF token',
+          message: 'Your session may have expired. Please refresh the page and try again.',
+        }),
+        {
+          status: 403,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
+  }
 
   // IP Whitelisting for admin routes
   if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
@@ -99,15 +151,17 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Continue with the request
-  return NextResponse.next();
+  // Return response with CSRF token
+  return response;
 }
 
 // Configure which routes the middleware should run on
 export const config = {
   matcher: [
-    // Admin routes
+    // Admin routes (IP whitelisting)
     '/admin/:path*',
     '/api/admin/:path*',
+    // API routes (CSRF protection)
+    '/api/:path*',
   ],
 };

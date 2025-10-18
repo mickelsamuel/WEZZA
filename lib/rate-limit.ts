@@ -205,3 +205,27 @@ export async function getRateLimitStatus(
     resetAt: record.resetAt,
   };
 }
+
+/**
+ * Generate standard rate limit headers for HTTP responses
+ * These headers inform clients about their rate limit status
+ *
+ * @param limit - Maximum requests allowed
+ * @param remaining - Requests remaining in current window
+ * @param resetAt - Timestamp when the limit resets (milliseconds)
+ * @returns Headers object with X-RateLimit-* headers
+ */
+export function getRateLimitHeaders(
+  limit: number,
+  remaining: number,
+  resetAt: number
+): Record<string, string> {
+  const resetInSeconds = Math.ceil((resetAt - Date.now()) / 1000);
+
+  return {
+    'X-RateLimit-Limit': limit.toString(),
+    'X-RateLimit-Remaining': remaining.toString(),
+    'X-RateLimit-Reset': Math.ceil(resetAt / 1000).toString(), // Unix timestamp in seconds
+    'Retry-After': resetInSeconds > 0 ? resetInSeconds.toString() : '0',
+  };
+}

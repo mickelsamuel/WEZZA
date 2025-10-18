@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import cloudinary from "@/lib/cloudinary";
 import { isAdmin, getSafeErrorMessage, logError } from "@/lib/security";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
 // POST /api/upload - Upload image (admin only)
 export async function POST(request: NextRequest) {
@@ -17,12 +17,15 @@ export async function POST(request: NextRequest) {
 
     // SECURITY: Rate limiting to prevent upload abuse
     const userId = session.user.id || 'unknown';
-    const rateLimit = await checkRateLimit(`upload:${userId}`, 20, 60000); // 20 uploads per minute
+    const rateLimitMax = 20;
+    const rateLimitWindow = 60000; // 1 minute
+    const rateLimit = await checkRateLimit(`upload:${userId}`, rateLimitMax, rateLimitWindow);
 
     if (!rateLimit.allowed) {
+      const headers = getRateLimitHeaders(rateLimitMax, rateLimit.remaining, rateLimit.resetAt!);
       return NextResponse.json(
         { error: "Too many upload requests. Please slow down." },
-        { status: 429 }
+        { status: 429, headers }
       );
     }
 
@@ -105,16 +108,22 @@ export async function POST(request: NextRequest) {
       uploadStream.end(buffer);
     });
 
-    return NextResponse.json({
-      url: result.secure_url,
-      publicId: result.public_id,
-      filename: file.name,
-      size: file.size,
-      type: file.type,
-      category,
-      width: result.width,
-      height: result.height,
-    });
+    // Include rate limit headers in successful response
+    const headers = getRateLimitHeaders(rateLimitMax, rateLimit.remaining, rateLimit.resetAt!);
+
+    return NextResponse.json(
+      {
+        url: result.secure_url,
+        publicId: result.public_id,
+        filename: file.name,
+        size: file.size,
+        type: file.type,
+        category,
+        width: result.width,
+        height: result.height,
+      },
+      { headers }
+    );
   } catch (error) {
     logError(error, 'upload/route');
     return NextResponse.json({ error: getSafeErrorMessage(error) }, { status: 500 });

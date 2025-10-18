@@ -16,6 +16,9 @@ export enum AuditAction {
   PASSWORD_CHANGED = 'password_changed',
   TWO_FACTOR_ENABLED = 'two_factor_enabled',
   TWO_FACTOR_DISABLED = 'two_factor_disabled',
+  TWO_FACTOR_SETUP_INITIATED = 'two_factor_setup_initiated',
+  TWO_FACTOR_VERIFICATION_FAILED = 'two_factor_verification_failed',
+  TWO_FACTOR_DISABLE_FAILED = 'two_factor_disable_failed',
 
   // User Management
   USER_CREATED = 'user_created',
