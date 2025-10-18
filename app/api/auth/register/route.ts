@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { sendWelcomeEmail } from "@/lib/email-automation";
-import { sanitizeEmail, validatePassword, checkRateLimit, getSafeErrorMessage, logError } from "@/lib/security";
+import {
+  sanitizeEmail,
+  validatePassword,
+  checkRateLimit,
+  getSafeErrorMessage,
+  logError,
+  checkPasswordBreach
+} from "@/lib/security";
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,6 +61,25 @@ export async function POST(request: NextRequest) {
         { error: passwordValidation.error },
         { status: 400 }
       );
+    }
+
+    // SECURITY: Check if password has been breached (non-blocking)
+    try {
+      const breachCheck = await checkPasswordBreach(password);
+      if (breachCheck.breached) {
+        console.warn(`[SECURITY] Breached password attempt for email: ${sanitizedEmail}, found ${breachCheck.count} times`);
+        return NextResponse.json(
+          {
+            error: `This password has been found in ${breachCheck.count.toLocaleString()} data breaches. Please choose a different password for your security.`,
+            breached: true
+          },
+          { status: 400 }
+        );
+      }
+    } catch (error) {
+      // If breach check fails, log but don't block registration
+      console.error('Password breach check failed:', error);
+      // Continue with registration
     }
 
     // Validate name length if provided
