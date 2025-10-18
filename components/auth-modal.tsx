@@ -29,6 +29,7 @@ export function AuthModal({ isOpen, onClose, defaultMode = "signin" }: AuthModal
     email: "",
     password: "",
     confirmPassword: "",
+    website: "", // Honeypot field - should remain empty
   });
 
   useEffect(() => {
@@ -114,6 +115,7 @@ export function AuthModal({ isOpen, onClose, defaultMode = "signin" }: AuthModal
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          website: formData.website, // Honeypot field
         }),
       });
 
@@ -166,6 +168,7 @@ export function AuthModal({ isOpen, onClose, defaultMode = "signin" }: AuthModal
       email: "",
       password: "",
       confirmPassword: "",
+      website: "",
     });
   };
 
@@ -394,6 +397,19 @@ export function AuthModal({ isOpen, onClose, defaultMode = "signin" }: AuthModal
                             {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                           </button>
                         </div>
+                      </div>
+
+                      {/* Honeypot field - hidden from users, catches bots */}
+                      <div className="absolute -left-[9999px] opacity-0 pointer-events-none" aria-hidden="true">
+                        <Input
+                          id="website"
+                          type="text"
+                          name="website"
+                          tabIndex={-1}
+                          autoComplete="off"
+                          value={formData.website}
+                          onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                        />
                       </div>
 
                       <Button

@@ -1,11 +1,33 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { sendWelcomeEmail } from "@/lib/email-automation";
+import { sanitizeEmail, validatePassword, checkRateLimit, getSafeErrorMessage, logError } from "@/lib/security";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { email, password, name } = await request.json();
+    // SECURITY: Rate limiting to prevent spam registrations
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const rateLimit = checkRateLimit(`register:${ip}`, 3, 3600000); // 3 registrations per hour
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many registration attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
+
+    const { email, password, name, website } = await request.json();
+
+    // SECURITY: Honeypot field check - reject if filled (indicates bot)
+    if (website && website.trim() !== '') {
+      console.warn('[SECURITY] Honeypot triggered for registration:', email);
+      // Return success to not alert the bot
+      return NextResponse.json(
+        { message: "User created successfully" },
+        { status: 201 }
+      );
+    }
 
     if (!email || !password) {
       return NextResponse.json(
@@ -14,9 +36,37 @@ export async function POST(request: Request) {
       );
     }
 
+    // SECURITY: Validate and sanitize email
+    let sanitizedEmail: string;
+    try {
+      sanitizedEmail = sanitizeEmail(email);
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Invalid email format" },
+        { status: 400 }
+      );
+    }
+
+    // SECURITY: Validate password strength
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      return NextResponse.json(
+        { error: passwordValidation.error },
+        { status: 400 }
+      );
+    }
+
+    // Validate name length if provided
+    if (name && name.length > 100) {
+      return NextResponse.json(
+        { error: "Name must be less than 100 characters" },
+        { status: 400 }
+      );
+    }
+
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email: sanitizedEmail }
     });
 
     if (existingUser) {
@@ -29,12 +79,12 @@ export async function POST(request: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Create user with sanitized data
     const user = await prisma.user.create({
       data: {
-        email,
+        email: sanitizedEmail,
         password: hashedPassword,
-        name: name || null,
+        name: name ? name.trim() : null,
       }
     });
 
@@ -64,9 +114,9 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Registration error:", error);
+    logError(error, 'auth/register');
     return NextResponse.json(
-      { error: "Something went wrong" },
+      { error: getSafeErrorMessage(error) },
       { status: 500 }
     );
   }

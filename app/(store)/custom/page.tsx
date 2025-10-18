@@ -31,6 +31,7 @@ export default function CustomOrderPage() {
     size: "",
     designNotes: "",
     imageUrl: "",
+    website: "", // Honeypot field - should remain empty
   });
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -96,6 +97,7 @@ export default function CustomOrderPage() {
         size: "",
         designNotes: "",
         imageUrl: "",
+        website: "",
       });
       setUploadedFile(null);
       setImagePreview(null);
@@ -252,6 +254,19 @@ export default function CustomOrderPage() {
               <p className="mt-1 text-sm text-muted-foreground">
                 {content["custom.form.imageUrl.description"] || "Already have your design hosted online? Paste the link here."}
               </p>
+            </div>
+
+            {/* Honeypot field - hidden from users, catches bots */}
+            <div className="absolute -left-[9999px] opacity-0 pointer-events-none" aria-hidden="true">
+              <Input
+                id="website"
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                value={formData.website}
+                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+              />
             </div>
 
             <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
