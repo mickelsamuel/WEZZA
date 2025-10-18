@@ -59,6 +59,13 @@ model User {
   password      String? // For credentials provider
   image         String?
   role          String    @default("customer") // customer, admin, collaborator
+
+  // Security fields
+  twoFactorSecret    String? // TOTP secret for 2FA (encrypted)
+  twoFactorEnabled   Boolean @default(false)
+  passwordChangedAt  DateTime? // Last password change timestamp
+  accountLockedUntil DateTime? // Account lockout expiry
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -473,4 +480,37 @@ model EmailTemplate {
   @@index([key])
   @@index([category])
   @@index([active])
+}
+
+// Security audit logging
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String? // User who performed the action (null for system actions)
+  userEmail  String? // Email of user who performed the action
+  action     String // "login", "logout", "create_product", "update_order", etc.
+  resource   String? // Type of resource affected: "user", "product", "order", etc.
+  resourceId String? // ID of the affected resource
+  ipAddress  String?
+  userAgent  String?  @db.Text
+  metadata   Json? // Additional context (old values, new values, etc.)
+  severity   String   @default("info") // "info", "warning", "critical"
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([userEmail])
+  @@index([action])
+  @@index([resource])
+  @@index([severity])
+  @@index([createdAt])
+}
+
+// Password history for preventing password reuse
+model PasswordHistory {
+  id             String   @id @default(cuid())
+  userId         String
+  passwordHash   String
+  createdAt      DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
 }
