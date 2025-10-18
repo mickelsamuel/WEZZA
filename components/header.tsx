@@ -181,14 +181,15 @@ export function Header() {
             </Button>
           </div>
         </div>
-
-        <MobileNav
-          isOpen={mobileMenuOpen}
-          onClose={() => setMobileMenuOpen(false)}
-          links={NAV_LINKS}
-          onAuthModalOpen={openAuthModal}
-        />
       </header>
+
+      {/* Mobile Nav - Rendered OUTSIDE header to avoid clipping */}
+      <MobileNav
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        links={NAV_LINKS}
+        onAuthModalOpen={openAuthModal}
+      />
 
       {/* Auth Modal - Rendered outside header to avoid clipping */}
       <AuthModal
