@@ -58,7 +58,7 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-background md:bg-background/95 backdrop-blur supports-[backdrop-filter]:md:bg-background/60">
         <div className="container mx-auto flex h-16 items-center px-4 relative">
           {/* Logo - Left Side */}
           <Link href="/" className="flex items-center -ml-2 z-10">

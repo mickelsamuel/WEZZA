@@ -74,16 +74,16 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-20 text-center">
-        <ShoppingBag className="mx-auto h-24 w-24 text-muted-foreground" />
-        <h1 className="mt-6 font-heading text-3xl font-bold">
+      <div className="container mx-auto px-4 py-12 text-center sm:py-20">
+        <ShoppingBag className="mx-auto h-16 w-16 text-muted-foreground sm:h-24 sm:w-24" />
+        <h1 className="mt-4 font-heading text-2xl font-bold sm:mt-6 sm:text-3xl">
           {content["cart.empty.title"] || "Your cart is empty"}
         </h1>
-        <p className="mt-2 text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground sm:text-base">
           {content["cart.empty.description"] || "Add some hoodies to get started"}
         </p>
         <Link href="/shop">
-          <Button size="lg" className="mt-8">
+          <Button size="lg" className="mt-6 w-full sm:mt-8 sm:w-auto">
             {content["cart.empty.button"] || "Shop Now"}
           </Button>
         </Link>
@@ -92,44 +92,44 @@ export default function CartPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="mb-8 font-heading text-4xl font-bold md:text-5xl">
+    <div className="container mx-auto px-4 py-8 sm:py-12">
+      <h1 className="mb-6 font-heading text-3xl font-bold sm:mb-8 sm:text-4xl md:text-5xl">
         {content["cart.pageTitle"] || "Shopping Cart"}
       </h1>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
         {/* Cart Items */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="space-y-3 sm:space-y-4 lg:col-span-2">
           {items.map((item) => (
-            <Card key={`${item.product.slug}-${item.size}`} className="p-6">
-              <div className="flex gap-6">
+            <Card key={`${item.product.slug}-${item.size}`} className="p-4 sm:p-6">
+              <div className="flex gap-4 sm:gap-6">
                 <Link
                   href={`/product/${item.product.slug}`}
-                  className="relative h-32 w-32 shrink-0 overflow-hidden rounded-lg bg-brand-gray"
+                  className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-brand-gray sm:h-32 sm:w-32"
                 >
                   <Image
                     src={item.product.images[0]}
                     alt={item.product.title}
                     fill
                     className="object-cover"
-                    sizes="128px"
+                    sizes="(max-width: 640px) 96px, 128px"
                   />
                 </Link>
 
                 <div className="flex flex-1 flex-col justify-between">
                   <div>
                     <Link href={`/product/${item.product.slug}`}>
-                      <h3 className="font-heading text-xl font-bold hover:text-brand-orange">
+                      <h3 className="font-heading text-base font-bold hover:text-brand-orange sm:text-xl">
                         {item.product.title}
                       </h3>
                     </Link>
-                    <p className="mt-1 text-sm text-muted-foreground">
+                    <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
                       {content["cart.item.size"] || "Size"}: {item.size} • {item.product.collection}
                     </p>
                     <Price
                       price={item.product.price}
                       currency={item.product.currency}
-                      className="mt-2 text-lg font-bold"
+                      className="mt-2 text-base font-bold sm:text-lg"
                     />
                   </div>
 
@@ -144,8 +144,9 @@ export default function CartPage() {
                       variant="ghost"
                       size="icon"
                       onClick={() => removeItem(item.product.slug, item.size)}
+                      className="h-8 w-8 sm:h-10 sm:w-10"
                     >
-                      <Trash2 className="h-5 w-5 text-red-600" />
+                      <Trash2 className="h-4 w-4 text-red-600 sm:h-5 sm:w-5" />
                     </Button>
                   </div>
                 </div>
@@ -156,25 +157,25 @@ export default function CartPage() {
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <Card className="sticky top-24 p-6">
-            <h2 className="font-heading text-2xl font-bold">
+          <Card className="p-4 sm:p-6 lg:sticky lg:top-24">
+            <h2 className="font-heading text-xl font-bold sm:text-2xl">
               {content["cart.summary.title"] || "Order Summary"}
             </h2>
 
-            <Separator className="my-4" />
+            <Separator className="my-3 sm:my-4" />
 
             <div className="space-y-2">
-              <div className="flex justify-between">
+              <div className="flex justify-between text-sm sm:text-base">
                 <span className="text-muted-foreground">
                   {content["cart.summary.subtotal"] || "Subtotal"}
                 </span>
                 <Price price={getTotal} />
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between text-sm sm:text-base">
                 <span className="text-muted-foreground">
                   {content["cart.summary.shipping"] || "Shipping"}
                 </span>
-                <span className="text-sm">
+                <span className="text-xs sm:text-sm">
                   {getTotal >= 10000
                     ? (content["cart.summary.shipping.free"] || "FREE")
                     : (content["cart.summary.shipping.calculated"] || "Calculated at checkout")}
@@ -182,22 +183,22 @@ export default function CartPage() {
               </div>
             </div>
 
-            <Separator className="my-4" />
+            <Separator className="my-3 sm:my-4" />
 
-            <div className="flex justify-between text-lg font-bold">
+            <div className="flex justify-between text-base font-bold sm:text-lg">
               <span>{content["cart.summary.total"] || "Total"}</span>
               <Price price={getTotal} />
             </div>
 
             {getTotal < 10000 && (
-              <p className="mt-4 text-center text-sm text-muted-foreground">
+              <p className="mt-3 text-center text-xs text-muted-foreground sm:mt-4 sm:text-sm">
                 {content["cart.summary.freeShippingMessage"] || "Add"} <Price price={10000 - getTotal} /> {content["cart.summary.freeShippingMessage2"] || "more for free shipping"}
               </p>
             )}
 
             <Button
               size="lg"
-              className="mt-6 w-full"
+              className="mt-4 w-full sm:mt-6"
               onClick={handleCheckout}
               disabled={isCheckingOut}
             >
@@ -206,7 +207,7 @@ export default function CartPage() {
                 : (content["cart.checkout.button"] || "Proceed to Checkout")}
             </Button>
 
-            <p className="mt-4 text-center text-xs text-muted-foreground">
+            <p className="mt-3 text-center text-xs text-muted-foreground sm:mt-4">
               {content["cart.checkout.secure"] || "Secure checkout powered by Stripe"}
             </p>
           </Card>

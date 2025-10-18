@@ -84,23 +84,23 @@ function ShopPageContent() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="mb-8">
-        <h1 className="font-heading text-4xl font-bold md:text-5xl">
+    <div className="container mx-auto px-4 py-8 sm:py-12">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="font-heading text-3xl font-bold sm:text-4xl md:text-5xl">
           {content["shop.pageTitle"] || "Shop All Hoodies"}
         </h1>
-        <p className="mt-2 text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground sm:text-base">
           {products.length} {products.length === 1
             ? (content["shop.productCount.singular"] || "product")
             : (content["shop.productCount.plural"] || "products")} {content["shop.productCount.available"] || "available"}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-4">
         {/* Filters Sidebar */}
         <aside className="lg:col-span-1">
-          <Card className="p-6">
-            <h2 className="mb-4 font-heading text-xl font-bold">
+          <Card className="p-4 sm:p-6">
+            <h2 className="mb-3 font-heading text-lg font-bold sm:mb-4 sm:text-xl">
               {content["shop.filters.title"] || "Filters"}
             </h2>
             <Filters
@@ -117,7 +117,7 @@ function ShopPageContent() {
         <div className="lg:col-span-3">
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground sm:text-base">
                 {content["shop.loading"] || "Loading products..."}
               </p>
             </div>

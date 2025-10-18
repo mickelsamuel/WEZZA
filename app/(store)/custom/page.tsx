@@ -112,21 +112,21 @@ export default function CustomOrderPage() {
 
   if (isSubmitted) {
     return (
-      <div className="container mx-auto px-4 py-20 text-center">
-        <CheckCircle2 className="mx-auto h-24 w-24 text-green-500" />
-        <h1 className="mt-6 font-heading text-3xl font-bold">
+      <div className="container mx-auto px-4 py-12 text-center sm:py-20">
+        <CheckCircle2 className="mx-auto h-16 w-16 text-green-500 sm:h-24 sm:w-24" />
+        <h1 className="mt-4 font-heading text-2xl font-bold sm:mt-6 sm:text-3xl">
           {content["custom.success.title"] || "Order Submitted!"}
         </h1>
-        <p className="mt-4 text-lg text-muted-foreground">
+        <p className="mt-3 text-base text-muted-foreground sm:mt-4 sm:text-lg">
           {content["custom.success.message"] || "Thank you for your custom order request."}
           <br />
           {content["custom.success.followUp"] || "We'll review your design notes and get back to you within 24 hours."}
         </p>
-        <div className="mt-8 space-x-4">
-          <Button onClick={() => setIsSubmitted(false)}>
+        <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:justify-center sm:gap-4">
+          <Button onClick={() => setIsSubmitted(false)} className="w-full sm:w-auto">
             {content["custom.success.submitAnother"] || "Submit Another"}
           </Button>
-          <Button variant="outline" onClick={() => (window.location.href = "/shop")}>
+          <Button variant="outline" onClick={() => (window.location.href = "/shop")} className="w-full sm:w-auto">
             {content["custom.success.continueShopping"] || "Continue Shopping"}
           </Button>
         </div>
@@ -135,45 +135,45 @@ export default function CustomOrderPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-8 sm:py-12">
       <div className="mx-auto max-w-3xl">
-        <div className="mb-8 text-center">
-          <h1 className="font-heading text-4xl font-bold md:text-5xl">
+        <div className="mb-6 text-center sm:mb-8">
+          <h1 className="font-heading text-3xl font-bold sm:text-4xl md:text-5xl">
             {content["custom.pageTitle"] || "Custom Orders"}
           </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-3 text-base text-muted-foreground sm:mt-4 sm:text-lg">
             {content["custom.pageDescription"] || "Create your perfect hoodie. Starting at $89.99 CAD"}
           </p>
         </div>
 
-        <Card className="p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <Card className="p-4 sm:p-6 md:p-8">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
               <div>
-                <Label htmlFor="name">{content["custom.form.name.label"] || "Full Name *"}</Label>
+                <Label htmlFor="name" className="text-sm sm:text-base">{content["custom.form.name.label"] || "Full Name *"}</Label>
                 <Input
                   id="name"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-2"
+                  className="mt-1.5 sm:mt-2"
                 />
               </div>
 
               <div>
-                <Label htmlFor="email">{content["custom.form.email.label"] || "Email *"}</Label>
+                <Label htmlFor="email" className="text-sm sm:text-base">{content["custom.form.email.label"] || "Email *"}</Label>
                 <Input
                   id="email"
                   type="email"
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="mt-2"
+                  className="mt-1.5 sm:mt-2"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
               <div>
                 <Label htmlFor="color">{content["custom.form.color.label"] || "Hoodie Color *"}</Label>
                 <Select

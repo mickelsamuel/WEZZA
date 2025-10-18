@@ -95,7 +95,7 @@ export default async function HomePage() {
 
       {/* Personalized Recommendations (for logged-in users) */}
       {personalizedProducts && personalizedProducts.length > 0 && (
-        <section className="py-16 bg-gray-50">
+        <section className="py-12 bg-gray-50 sm:py-16">
           <div className="container mx-auto px-4">
             <ProductRecommendations
               products={personalizedProducts}
@@ -107,13 +107,13 @@ export default async function HomePage() {
       )}
 
       {/* Featured Products */}
-      <section className="py-16">
+      <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <h2 className="font-heading text-3xl font-bold md:text-4xl">
+          <div className="mb-8 text-center sm:mb-12">
+            <h2 className="font-heading text-2xl font-bold sm:text-3xl md:text-4xl">
               {content["home.featured.title"] || "Featured Hoodies"}
             </h2>
-            <p className="mt-2 text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               {content["home.featured.description"] || "Our most popular styles"}
             </p>
           </div>
@@ -125,33 +125,33 @@ export default async function HomePage() {
             </div>
           )}
           <ProductGrid products={featuredProducts} />
-          <div className="mt-12 text-center">
+          <div className="mt-8 text-center sm:mt-12">
             <Link href="/shop">
-              <Button size="lg">{content["home.featured.viewAll"] || "View All Products"}</Button>
+              <Button size="lg" className="w-full sm:w-auto">{content["home.featured.viewAll"] || "View All Products"}</Button>
             </Link>
           </div>
         </div>
       </section>
 
       {/* Value Props */}
-      <section className="bg-brand-peach/20 py-16">
+      <section className="bg-brand-peach/20 py-12 sm:py-16">
         <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <h2 className="font-heading text-3xl font-bold md:text-4xl">
+          <div className="mb-8 text-center sm:mb-12">
+            <h2 className="font-heading text-2xl font-bold sm:text-3xl md:text-4xl">
               {content["home.valueProps.title"] || "Made For Daily Wear"}
             </h2>
-            <p className="mt-2 text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               {content["home.valueProps.description"] || "Every detail matters when you're building something to last"}
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-3">
             {VALUE_PROPS.map((prop) => (
               <div key={prop.title} className="text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-orange text-white">
-                  <prop.icon className="h-8 w-8" />
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-orange text-white sm:h-16 sm:w-16">
+                  <prop.icon className="h-7 w-7 sm:h-8 sm:w-8" />
                 </div>
-                <h3 className="mt-4 font-heading text-xl font-bold">{prop.title}</h3>
-                <p className="mt-2 text-muted-foreground">{prop.description}</p>
+                <h3 className="mt-3 font-heading text-lg font-bold sm:mt-4 sm:text-xl">{prop.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground sm:text-base">{prop.description}</p>
               </div>
             ))}
           </div>

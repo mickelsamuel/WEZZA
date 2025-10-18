@@ -86,18 +86,18 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
   return (
     <ProductPageClient product={product}>
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8 sm:py-12">
       <Link href="/shop">
-        <Button variant="ghost" className="mb-8">
+        <Button variant="ghost" className="mb-6 sm:mb-8">
           <ChevronLeft className="mr-2 h-4 w-4" />
           {content["product.backToShop"] || "Back to Shop"}
         </Button>
       </Link>
 
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12">
         {/* Image Gallery */}
-        <div className="space-y-4">
-          <div className="relative aspect-square overflow-hidden rounded-2xl bg-brand-gray">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="relative aspect-square overflow-hidden rounded-xl bg-brand-gray sm:rounded-2xl">
             <Image
               src={product.images[0]}
               alt={product.title}
@@ -107,7 +107,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3 sm:gap-4">
             {product.images.slice(1).map((image, index) => (
               <div
                 key={index}
@@ -127,12 +127,12 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
         {/* Product Info */}
         <div>
-          <p className="text-sm uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground sm:text-sm">
             {product.collection}
           </p>
-          <h1 className="mt-2 font-heading text-4xl font-bold md:text-5xl">{product.title}</h1>
-          <div className="mt-4 flex items-center gap-2">
-            <Price price={product.price} currency={product.currency} className="text-3xl font-bold" />
+          <h1 className="mt-2 font-heading text-3xl font-bold sm:text-4xl md:text-5xl">{product.title}</h1>
+          <div className="mt-3 flex items-center gap-2 sm:mt-4">
+            <Price price={product.price} currency={product.currency} className="text-2xl font-bold sm:text-3xl" />
             {!product.inStock && (
               <span className="rounded bg-red-100 px-2 py-1 text-xs font-semibold text-red-600">
                 {content["product.outOfStock"] || "Out of Stock"}
@@ -140,43 +140,43 @@ export default async function ProductPage({ params }: { params: { slug: string }
             )}
           </div>
 
-          <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:mt-6 sm:text-lg">
             {product.description}
           </p>
 
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             <SizeGuideModal />
           </div>
 
-          <div className="mt-6 space-y-3">
+          <div className="mt-4 space-y-3 sm:mt-6">
             <AddToCartEnhanced product={product} />
             <WishlistButton productSlug={product.slug} />
           </div>
 
           {/* Product Details Accordion */}
-          <div className="mt-12">
+          <div className="mt-8 sm:mt-12">
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="fabric">
-                <AccordionTrigger className="text-lg font-semibold">
+                <AccordionTrigger className="text-base font-semibold sm:text-lg">
                   {content["product.accordion.fabric"] || "Fabric & Construction"}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
+                <AccordionContent className="text-sm text-muted-foreground sm:text-base">
                   {product.fabric}
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="care">
-                <AccordionTrigger className="text-lg font-semibold">
+                <AccordionTrigger className="text-base font-semibold sm:text-lg">
                   {content["product.accordion.care"] || "Care Instructions"}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
+                <AccordionContent className="text-sm text-muted-foreground sm:text-base">
                   {product.care}
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="shipping">
-                <AccordionTrigger className="text-lg font-semibold">
+                <AccordionTrigger className="text-base font-semibold sm:text-lg">
                   {content["product.accordion.shipping"] || "Shipping & Returns"}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
+                <AccordionContent className="text-sm text-muted-foreground sm:text-base">
                   {product.shipping}
                 </AccordionContent>
               </AccordionItem>
@@ -186,15 +186,15 @@ export default async function ProductPage({ params }: { params: { slug: string }
       </div>
 
       {/* Customer Reviews */}
-      <div className="mt-20 border-t pt-12">
-        <h2 className="mb-8 font-heading text-3xl font-bold">
+      <div className="mt-12 border-t pt-8 sm:mt-20 sm:pt-12">
+        <h2 className="mb-6 font-heading text-2xl font-bold sm:mb-8 sm:text-3xl">
           {content["product.reviews.title"] || "Customer Reviews"}
         </h2>
         <ProductReviews productSlug={product.slug} />
       </div>
 
       {/* Related Products */}
-      <div className="mt-20 border-t">
+      <div className="mt-12 border-t sm:mt-20">
         <RelatedProducts product={product} />
       </div>
     </div>

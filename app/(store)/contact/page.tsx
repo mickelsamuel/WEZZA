@@ -38,41 +38,41 @@ export default async function ContactPage() {
     },
   ];
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-8 sm:py-12">
       <div className="mx-auto max-w-4xl">
-        <h1 className="mb-8 font-heading text-4xl font-bold md:text-5xl">
+        <h1 className="mb-6 font-heading text-3xl font-bold sm:mb-8 sm:text-4xl md:text-5xl">
           {content["contact.pageTitle"] || "Contact & FAQ"}
         </h1>
 
         {/* Contact Cards */}
-        <div className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-2">
-          <Card className="p-8 text-center">
-            <Mail className="mx-auto h-12 w-12 text-brand-orange" />
-            <h2 className="mt-4 font-heading text-xl font-bold">
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:mb-12 sm:gap-6 md:grid-cols-2">
+          <Card className="p-6 text-center sm:p-8">
+            <Mail className="mx-auto h-10 w-10 text-brand-orange sm:h-12 sm:w-12" />
+            <h2 className="mt-3 font-heading text-lg font-bold sm:mt-4 sm:text-xl">
               {content["contact.email.title"] || "Email Us"}
             </h2>
-            <p className="mt-2 text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               {content["contact.email.description"] || "For general inquiries and support"}
             </p>
             <a
               href={`mailto:${content["contact.email.address"] || "wezza28711@gmail.com"}`}
-              className="mt-4 inline-block font-semibold text-brand-orange hover:underline"
+              className="mt-3 inline-block text-sm font-semibold text-brand-orange hover:underline sm:mt-4 sm:text-base"
             >
               {content["contact.email.address"] || "wezza28711@gmail.com"}
             </a>
           </Card>
 
-          <Card className="p-8 text-center">
-            <MessageCircle className="mx-auto h-12 w-12 text-brand-orange" />
-            <h2 className="mt-4 font-heading text-xl font-bold">
+          <Card className="p-6 text-center sm:p-8">
+            <MessageCircle className="mx-auto h-10 w-10 text-brand-orange sm:h-12 sm:w-12" />
+            <h2 className="mt-3 font-heading text-lg font-bold sm:mt-4 sm:text-xl">
               {content["contact.custom.title"] || "Custom Orders"}
             </h2>
-            <p className="mt-2 text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               {content["contact.custom.description"] || "Questions about custom designs?"}
             </p>
             <a
               href={`mailto:${content["contact.custom.address"] || "wezza28711@gmail.com"}`}
-              className="mt-4 inline-block font-semibold text-brand-orange hover:underline"
+              className="mt-3 inline-block text-sm font-semibold text-brand-orange hover:underline sm:mt-4 sm:text-base"
             >
               {content["contact.custom.address"] || "wezza28711@gmail.com"}
             </a>
@@ -81,16 +81,16 @@ export default async function ContactPage() {
 
         {/* FAQ Section */}
         <div id="faq">
-          <h2 className="mb-6 font-heading text-3xl font-bold">
+          <h2 className="mb-4 font-heading text-2xl font-bold sm:mb-6 sm:text-3xl">
             {content["contact.faq.title"] || "Frequently Asked Questions"}
           </h2>
           <Accordion type="single" collapsible className="w-full">
             {FAQS.map((faq, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
-                <AccordionTrigger className="text-left text-lg font-semibold">
+                <AccordionTrigger className="text-left text-base font-semibold sm:text-lg">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
+                <AccordionContent className="text-sm text-muted-foreground sm:text-base">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -99,11 +99,11 @@ export default async function ContactPage() {
         </div>
 
         {/* Additional Info */}
-        <div className="mt-12 rounded-2xl bg-brand-peach/20 p-8">
-          <h3 className="font-heading text-2xl font-bold">
+        <div className="mt-8 rounded-xl bg-brand-peach/20 p-6 sm:mt-12 sm:rounded-2xl sm:p-8">
+          <h3 className="font-heading text-xl font-bold sm:text-2xl">
             {content["contact.footer.title"] || "Still have questions?"}
           </h3>
-          <p className="mt-2 text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
             {content["contact.footer.text"] || "We're here to help. Email us at"}{" "}
             <a
               href={`mailto:${content["contact.email.address"] || "wezza28711@gmail.com"}`}
