@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { logAuthEvent } from "@/lib/audit-log";
+import { logAuthEvent, AuditAction } from "@/lib/audit-log";
 
 /**
  * DELETE /api/account/delete
@@ -61,7 +61,7 @@ export async function DELETE(request: Request) {
 
     // Log the account deletion attempt
     await logAuthEvent(
-      "account_deleted",
+      AuditAction.ACCOUNT_DELETED,
       user.email,
       true,
       headers,
