@@ -48,9 +48,9 @@ export function MobileNav({ isOpen, onClose, links, onAuthModalOpen }: MobileNav
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 md:hidden">
+    <div className="fixed inset-0 z-[100] md:hidden">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="fixed right-0 top-0 h-full w-3/4 max-w-sm bg-white dark:bg-gray-950 p-6 shadow-2xl border-l">
+      <div className="fixed right-0 top-0 h-full w-3/4 max-w-sm bg-white dark:bg-gray-950 p-6 shadow-2xl border-l overflow-y-auto">
         <div className="flex items-center justify-between">
           <h2 className="font-heading text-2xl font-bold text-foreground">
             {content["mobileNav.menu"] || "Menu"}
