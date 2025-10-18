@@ -5,11 +5,11 @@ import { sendWelcomeEmail } from "@/lib/email-automation";
 import {
   sanitizeEmail,
   validatePassword,
-  checkRateLimit,
   getSafeErrorMessage,
   logError,
   checkPasswordBreach
 } from "@/lib/security";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {

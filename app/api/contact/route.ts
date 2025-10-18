@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resend, FROM_EMAIL } from "@/lib/email";
-import { escapeHtml, sanitizeEmail, sanitizeText, sanitizeUrl, checkRateLimit, getSafeErrorMessage, logError } from "@/lib/security";
+import { escapeHtml, sanitizeEmail, sanitizeText, sanitizeUrl, getSafeErrorMessage, logError } from "@/lib/security";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
