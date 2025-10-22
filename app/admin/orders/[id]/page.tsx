@@ -12,6 +12,7 @@ import { formatPrice } from "@/lib/currency";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { OrderComments } from "@/components/order-comments";
 import { ArrowLeft } from "lucide-react";
 
 interface OrderItem {
@@ -24,6 +25,7 @@ interface OrderItem {
 
 interface Order {
   id: string;
+  orderNumber: string;
   customerName: string;
   customerEmail: string;
   total: number;
@@ -236,6 +238,9 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               </div>
             </CardContent>
           </Card>
+
+          {/* Order Comments */}
+          <OrderComments orderNumber={order.orderNumber} />
         </div>
 
         {/* Sidebar */}

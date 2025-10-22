@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { OrderComments } from "@/components/order-comments";
 import { CheckCircle, Clock, Package, Truck, XCircle, AlertCircle, ArrowLeft } from "lucide-react";
 
 interface OrderItem {
@@ -340,6 +341,8 @@ export default function OrderStatusPage() {
               </div>
             </div>
           </Card>
+
+          <OrderComments orderNumber={order.orderNumber} />
         </div>
       </div>
     </div>

@@ -113,6 +113,7 @@ model Order {
 
   user           User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
   returnRequests ReturnRequest[]
+  comments       OrderComment[]
 
   @@index([userId])
   @@index([orderNumber])
@@ -123,6 +124,25 @@ model Order {
   @@index([expiresAt])
   @@index([status, createdAt]) // Compound index for admin dashboard queries
   @@index([paymentStatus, createdAt]) // Compound index for payment tracking
+}
+
+// Order comments for communication between admin and customer
+model OrderComment {
+  id        String   @id @default(cuid())
+  orderId   String
+  userId    String? // User who created the comment (admin or customer)
+  userName  String // Name to display
+  userRole  String // "admin" or "customer"
+  message   String   @db.Text
+  isAdminOnly Boolean @default(false) // Internal admin notes not visible to customer
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([createdAt])
+  @@index([orderId, createdAt]) // Compound index for fetching order comments chronologically
 }
 
 // Address model for saved addresses
