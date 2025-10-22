@@ -43,6 +43,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Payment already confirmed" }, { status: 400 });
     }
 
+    // Update inventory for each item in the order
+    const orderItems = order.items as any[];
+    for (const item of orderItems) {
+      try {
+        // Get current inventory
+        const inventory = await prisma.productInventory.findUnique({
+          where: { productSlug: item.slug },
+        });
+
+        if (inventory) {
+          const sizeQuantities = inventory.sizeQuantities as Record<string, number>;
+          const currentQty = sizeQuantities[item.size] || 0;
+          const newQty = Math.max(0, currentQty - item.quantity);
+
+          // Update inventory
+          await prisma.productInventory.update({
+            where: { productSlug: item.slug },
+            data: {
+              sizeQuantities: {
+                ...sizeQuantities,
+                [item.size]: newQty,
+              },
+            },
+          });
+
+          console.log(`Updated inventory for ${item.slug} size ${item.size}: ${currentQty} -> ${newQty}`);
+        }
+      } catch (invError) {
+        console.error(`Failed to update inventory for ${item.slug}:`, invError);
+        // Continue with payment confirmation even if inventory update fails
+      }
+    }
+
     // Update order
     const now = new Date();
     const updatedOrder = await prisma.order.update({

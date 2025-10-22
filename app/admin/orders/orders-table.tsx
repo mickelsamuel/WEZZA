@@ -77,6 +77,7 @@ export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
       });
 
       // Refresh the page to show updated status
+      // Don't clear confirmingPayment state until refresh completes
       router.refresh();
     } catch (error) {
       toast({
@@ -84,7 +85,7 @@ export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
         description: error instanceof Error ? error.message : "Failed to confirm payment",
         variant: "destructive",
       });
-    } finally {
+      // Only clear state on error, so button can be tried again
       setConfirmingPayment(null);
     }
   };
