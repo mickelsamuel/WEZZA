@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 import { Resend } from "resend";
@@ -106,10 +108,15 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + expirationHours);
 
+    // Check if user is logged in
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id || null;
+
     // Create order in database
     const order = await prisma.order.create({
       data: {
         orderNumber,
+        userId, // Link to user if logged in
         status: "pending_payment",
         paymentMethod: "etransfer",
         paymentStatus: "pending",

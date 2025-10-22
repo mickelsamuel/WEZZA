@@ -498,13 +498,13 @@ export default function AccountPage() {
           ) : (
             <div className="space-y-4">
               {orders.map((order) => (
-                <Link key={order.id} href={`/orders/${order.id}`}>
+                <Link key={order.id} href={`/orders/${order.orderNumber}`}>
                   <div className="border border-white/20 rounded-xl p-6 hover:border-brand-orange hover:bg-white/5 transition-all cursor-pointer">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
                           <p className="text-white font-semibold text-lg">
-                            Order #{order.id.slice(0, 8)}
+                            Order #{order.orderNumber}
                           </p>
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-semibold ${
