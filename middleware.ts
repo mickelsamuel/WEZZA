@@ -94,6 +94,7 @@ export async function middleware(request: NextRequest) {
   // - Admin API endpoints (protected by auth + role checks + optional IP whitelist)
   // - Account endpoints (require authentication, user-specific)
   // - Checkout endpoints (require authentication)
+  // - Orders endpoints (require authentication, user-specific)
   const method = request.method;
   const isStateChanging = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method);
   const isWebhook = pathname.startsWith('/api/webhooks/');
@@ -102,8 +103,9 @@ export async function middleware(request: NextRequest) {
   const isAdminApi = pathname.startsWith('/api/admin/');
   const isAccountApi = pathname.startsWith('/api/account/');
   const isCheckout = pathname.startsWith('/api/checkout');
+  const isOrders = pathname.startsWith('/api/orders/');
 
-  if (isStateChanging && !isWebhook && !isNextAuth && !isCart && !isAdminApi && !isAccountApi && !isCheckout) {
+  if (isStateChanging && !isWebhook && !isNextAuth && !isCart && !isAdminApi && !isAccountApi && !isCheckout && !isOrders) {
     try {
       await csrfProtect(request, response);
     } catch (error) {
