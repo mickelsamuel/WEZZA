@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { MessageSquare, Send, Shield, User } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,7 +28,6 @@ export function OrderComments({ orderNumber, isAdminView = false }: OrderComment
   const { data: session } = useSession();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [isAdminOnly, setIsAdminOnly] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
 
@@ -67,7 +64,7 @@ export function OrderComments({ orderNumber, isAdminView = false }: OrderComment
         },
         body: JSON.stringify({
           message: newMessage,
-          isAdminOnly,
+          isAdminOnly: false,
         }),
       });
 
@@ -79,7 +76,6 @@ export function OrderComments({ orderNumber, isAdminView = false }: OrderComment
       const data = await response.json();
       setComments([...comments, data.comment]);
       setNewMessage("");
-      setIsAdminOnly(false);
       toast.success("Message sent");
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to send message";
@@ -196,22 +192,6 @@ export function OrderComments({ orderNumber, isAdminView = false }: OrderComment
               rows={3}
               disabled={sending}
             />
-            {isAdmin && (
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="admin-only"
-                  checked={isAdminOnly}
-                  onCheckedChange={(checked) => setIsAdminOnly(checked as boolean)}
-                  disabled={sending}
-                />
-                <Label
-                  htmlFor="admin-only"
-                  className="text-sm cursor-pointer"
-                >
-                  Internal note (not visible to customer)
-                </Label>
-              </div>
-            )}
             <Button
               onClick={handleSendMessage}
               disabled={!newMessage.trim() || sending}
