@@ -93,7 +93,7 @@ export async function middleware(request: NextRequest) {
   // - Cart endpoints (require authentication, user-specific)
   // - Admin API endpoints (protected by auth + role checks + optional IP whitelist)
   // - Account endpoints (require authentication, user-specific)
-  // - Checkout endpoints (authenticated, Stripe-secured)
+  // - Checkout endpoints (require authentication)
   const method = request.method;
   const isStateChanging = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method);
   const isWebhook = pathname.startsWith('/api/webhooks/');

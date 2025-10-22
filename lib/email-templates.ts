@@ -215,7 +215,7 @@ export function generateOrderConfirmationEmail(data: OrderConfirmationData): str
       </div>
 
       <center>
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza.com'}/account" class="button">
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}/account" class="button">
           View Order Status
         </a>
       </center>
@@ -227,7 +227,7 @@ export function generateOrderConfirmationEmail(data: OrderConfirmationData): str
         <a href="mailto:wezza28711@gmail.com" class="footer-link">wezza28711@gmail.com</a>
       </p>
       <p style="margin-top: 16px;">
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza.com'}" class="footer-link">www.wezza.com</a>
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}" class="footer-link">wezza-store.vercel.app</a>
       </p>
     </div>
   </div>
@@ -273,8 +273,8 @@ export function generateShippingConfirmationEmail(data: ShippingConfirmationData
       </div>
 
       <center>
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza.com'}/track/${data.orderNumber}" class="button">
-          Track Your Order
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}/account" class="button">
+          View Your Orders
         </a>
       </center>
 
@@ -289,7 +289,7 @@ export function generateShippingConfirmationEmail(data: ShippingConfirmationData
         <a href="mailto:wezza28711@gmail.com" class="footer-link">wezza28711@gmail.com</a>
       </p>
       <p style="margin-top: 16px;">
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza.com'}" class="footer-link">www.wezza.com</a>
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}" class="footer-link">wezza-store.vercel.app</a>
       </p>
     </div>
   </div>
@@ -424,9 +424,13 @@ export function generatePaymentConfirmationEmail(data: PaymentConfirmationData):
         </ul>
       </div>
 
+      <div style="background-color: #FFF8E7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #FF6B35;">
+        <p style="margin: 0; font-size: 13px;"><strong>📧 Check Your Spam Folder:</strong> Our emails sometimes end up in spam. Please check your spam/junk folder and mark us as "Not Spam" to ensure you receive shipping updates.</p>
+      </div>
+
       <center>
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza.com'}/orders/${data.orderNumber}" class="button">
-          Track Your Order
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}/account" class="button">
+          View Your Orders
         </a>
       </center>
 
@@ -441,7 +445,7 @@ export function generatePaymentConfirmationEmail(data: PaymentConfirmationData):
         <a href="mailto:wezza28711@gmail.com" class="footer-link">wezza28711@gmail.com</a>
       </p>
       <p style="margin-top: 16px;">
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza.com'}" class="footer-link">www.wezza.com</a>
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}" class="footer-link">wezza-store.vercel.app</a>
       </p>
     </div>
   </div>
@@ -485,7 +489,7 @@ export function generateDeliveryNotificationEmail(customerName: string, orderNum
       </p>
 
       <center>
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza.com'}/shop" class="button">
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}/shop" class="button">
           Shop More Hoodies
         </a>
       </center>
@@ -493,7 +497,7 @@ export function generateDeliveryNotificationEmail(customerName: string, orderNum
       <p class="text" style="margin-top: 32px; padding-top: 32px; border-top: 1px solid #e0e0e0;">
         <strong>Need to return or exchange?</strong><br>
         We offer free returns within 30 days.
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza.com'}/account/returns" class="footer-link">Start a return</a>
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}/account/returns" class="footer-link">Start a return</a>
       </p>
     </div>
 
@@ -503,7 +507,7 @@ export function generateDeliveryNotificationEmail(customerName: string, orderNum
         <a href="mailto:wezza28711@gmail.com" class="footer-link">wezza28711@gmail.com</a>
       </p>
       <p style="margin-top: 16px;">
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza.com'}" class="footer-link">www.wezza.com</a>
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}" class="footer-link">wezza-store.vercel.app</a>
       </p>
     </div>
   </div>

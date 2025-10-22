@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useCartStore } from "@/store/cart";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import { QuantitySelector } from "@/components/quantity-selector";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +39,7 @@ interface ShippingFormData {
 
 export default function CartPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [content, setContent] = useState<Record<string, string>>({});
   const items = useCartStore((state) => state.items);
   const clearCart = useCartStore((state) => state.clearCart);
@@ -46,6 +49,8 @@ export default function CartPage() {
   const { toast } = useToast();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
+  const [saveAddress, setSaveAddress] = useState(false);
+  const [hasDefaultAddress, setHasDefaultAddress] = useState(false);
   const [shippingData, setShippingData] = useState<ShippingFormData>({
     name: "",
     email: "",
@@ -72,7 +77,31 @@ export default function CartPage() {
       });
   }, []);
 
-  const handleCheckoutClick = () => {
+  const handleCheckoutClick = async () => {
+    // If user is logged in, try to load their default address
+    if (session?.user) {
+      try {
+        const response = await fetch("/api/account/addresses/default");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.address) {
+            setShippingData({
+              name: data.address.name,
+              email: session.user.email || "",
+              phone: "",
+              street: data.address.street,
+              city: data.address.city,
+              province: data.address.province,
+              postalCode: data.address.postalCode,
+              country: data.address.country,
+            });
+            setHasDefaultAddress(true);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load default address:", error);
+      }
+    }
     setShowCheckoutDialog(true);
   };
 
@@ -99,6 +128,29 @@ export default function CartPage() {
       const data = await response.json();
 
       if (data.success && data.orderNumber) {
+        // Save address if user opted to save it
+        if (saveAddress && session?.user && !hasDefaultAddress) {
+          try {
+            await fetch("/api/account/addresses", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name: shippingData.name,
+                street: shippingData.street,
+                city: shippingData.city,
+                province: shippingData.province,
+                postalCode: shippingData.postalCode,
+                country: shippingData.country,
+                isDefault: true,
+              }),
+            });
+          } catch (error) {
+            console.error("Failed to save address:", error);
+          }
+        }
+
         // Clear cart
         clearCart();
         // Redirect to order status page
@@ -386,6 +438,30 @@ export default function CartPage() {
 
             <Separator className="my-4" />
 
+            {session?.user && !hasDefaultAddress && (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="save-address"
+                  checked={saveAddress}
+                  onCheckedChange={(checked) => setSaveAddress(checked as boolean)}
+                />
+                <label
+                  htmlFor="save-address"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Save this address for future orders
+                </label>
+              </div>
+            )}
+
+            {hasDefaultAddress && (
+              <div className="rounded-lg bg-green-50 p-3 border border-green-200">
+                <p className="text-sm text-green-900">
+                  ✓ Using your saved address
+                </p>
+              </div>
+            )}
+
             <div className="rounded-lg bg-blue-50 p-4 border border-blue-200">
               <h3 className="font-bold text-blue-900 mb-2">What happens next?</h3>
               <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
@@ -394,6 +470,12 @@ export default function CartPage() {
                 <li>We'll confirm payment within 24 hours</li>
                 <li>Your order will be shipped with free delivery</li>
               </ol>
+            </div>
+
+            <div className="rounded-lg bg-orange-50 p-4 border border-orange-200">
+              <p className="text-sm text-orange-900">
+                <strong>📧 Check Your Spam Folder:</strong> Our confirmation emails sometimes end up in spam. Please check your spam/junk folder and mark us as "Not Spam" to ensure you receive all order updates.
+              </p>
             </div>
 
             <div className="flex gap-4 justify-end">

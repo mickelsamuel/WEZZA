@@ -33,8 +33,8 @@ WEZZA is a comprehensive, enterprise-grade e-commerce platform specializing in p
 #### Shopping Cart & Checkout
 - **Persistent Shopping Cart**: Saves cart in browser and syncs with account for seamless cross-device experience
 - **Free Shipping Threshold**: Visual progress indicator showing path to $100 CAD free shipping
-- **Secure Checkout**: Stripe-hosted, PCI-compliant checkout process
-- **Multiple Payment Methods**: Credit and debit cards via Stripe
+- **Secure Checkout**: E-transfer payment system with manual verification
+- **Multiple Payment Methods**: E-transfer (Interac) for Canadian customers
 - **Saved Payment Methods**: Returning customers can store payment methods for faster checkout
 - **Guest Checkout**: Purchase without account creation required
 - **Quick Buy**: Single-click checkout for fast purchases
@@ -117,7 +117,7 @@ The platform supports a sophisticated three-tier permission system:
 ### 5. PAYMENT & FINANCIAL MANAGEMENT
 
 #### Payment Processing
-- **Stripe Integration**: Secure, PCI-compliant payment processing
+- **E-Transfer Integration**: Free payment processing via e-transfer
 - **Webhook Automation**: Automatic order creation upon successful payment
 - **Idempotency Protection**: Prevents duplicate orders from webhook retries
 - **Saved Payment Methods**: Customers can securely save cards for faster checkout

@@ -212,6 +212,11 @@ export default function OrderStatusPage() {
                     <p className="mt-3 text-xs text-yellow-800">
                       <strong>Payment expires:</strong> {expiryDate.toLocaleDateString()} at {expiryDate.toLocaleTimeString()}
                     </p>
+                    <div className="mt-3 p-2 bg-orange-50 rounded border border-orange-200">
+                      <p className="text-xs text-orange-900">
+                        <strong>📧 Check Your Spam Folder:</strong> Our confirmation emails sometimes end up in spam. Please check your spam/junk folder and mark us as "Not Spam" to ensure you receive all order updates.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

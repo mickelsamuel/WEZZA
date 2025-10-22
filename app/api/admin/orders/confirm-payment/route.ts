@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       });
 
       await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || "WEZZA <orders@wezza.com>",
+        from: process.env.RESEND_FROM_EMAIL || "WEZZA <orders@wezza-store.vercel.app>",
         to: updatedOrder.customerEmail,
         subject: `Payment Confirmed - Order ${updatedOrder.orderNumber}`,
         html: emailHtml,

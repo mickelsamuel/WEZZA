@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_CA",
-    url: "https://wezza.com",
+    url: "https://wezza-store.vercel.app",
     title: "WEZZA - Premium Cotton Hoodies",
     description: "Built to live in. Premium heavyweight cotton hoodies.",
     siteName: "WEZZA",

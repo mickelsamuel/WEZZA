@@ -93,7 +93,7 @@ model Order {
   userId             String?
   orderNumber        String    @unique // Human-readable order number (e.g., "WEZZA-1001")
   status             String    @default("pending_payment") // pending_payment, processing, shipped, delivered, completed, cancelled, expired
-  paymentMethod      String    @default("etransfer") // "etransfer", "stripe" (for backwards compatibility)
+  paymentMethod      String    @default("etransfer") // "etransfer"
   paymentStatus      String    @default("pending") // pending, confirmed, failed, refunded
   paymentConfirmedBy String? // Admin user ID who confirmed payment
   paymentConfirmedAt DateTime?

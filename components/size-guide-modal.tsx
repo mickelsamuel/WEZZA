@@ -119,8 +119,8 @@ export function SizeGuideModal() {
           {/* Contact Support */}
           <div className="text-center text-sm text-muted-foreground">
             {content["sizeGuide.contact.text"] || "Still not sure? Contact us at"}{" "}
-            <a href={`mailto:${content["sizeGuide.contact.email"] || "support@wezza.com"}`} className="text-brand-orange hover:underline">
-              {content["sizeGuide.contact.email"] || "support@wezza.com"}
+            <a href={`mailto:${content["sizeGuide.contact.email"] || "support@wezza-store.vercel.app"}`} className="text-brand-orange hover:underline">
+              {content["sizeGuide.contact.email"] || "support@wezza-store.vercel.app"}
             </a>
           </div>
         </div>

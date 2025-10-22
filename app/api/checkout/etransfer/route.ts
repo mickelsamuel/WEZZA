@@ -194,7 +194,7 @@ async function sendPaymentInstructionsEmail({
   items: any[];
   expiresAt: Date;
 }) {
-  const etransferEmail = process.env.ETRANSFER_EMAIL || "payments@wezza.com";
+  const etransferEmail = process.env.ETRANSFER_EMAIL || "payments@wezza-store.vercel.app";
   const securityQuestion = process.env.ETRANSFER_SECURITY_QUESTION;
   const securityAnswer = process.env.ETRANSFER_SECURITY_ANSWER;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -283,6 +283,9 @@ async function sendPaymentInstructionsEmail({
       <div style="background-color: #FFF8E7; padding: 12px; border-radius: 4px; margin-top: 15px;">
         <p style="margin: 0; font-size: 14px;"><strong>⚠️ Important:</strong> Please include your order number <strong>${orderNumber}</strong> in the e-transfer message so we can identify your payment.</p>
       </div>
+      <div style="background-color: #FFF0F0; padding: 12px; border-radius: 4px; margin-top: 10px; border-left: 3px solid #FF6B35;">
+        <p style="margin: 0; font-size: 13px;"><strong>📧 Check Your Spam Folder:</strong> Our confirmation emails sometimes end up in spam. Please check your spam/junk folder and mark us as "Not Spam" to ensure you receive all order updates.</p>
+      </div>
     </div>
 
     <h3>Order Details</h3>
@@ -333,7 +336,7 @@ async function sendPaymentInstructionsEmail({
     <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
 
     <p style="font-size: 13px; color: #666;">
-      Questions? Contact us at ${process.env.RESEND_FROM_EMAIL || "support@wezza.com"}
+      Questions? Contact us at ${process.env.RESEND_FROM_EMAIL || "support@wezza-store.vercel.app"}
     </p>
     <p style="font-size: 13px; color: #666;">
       Order Number: ${orderNumber}

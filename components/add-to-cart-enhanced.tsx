@@ -119,48 +119,59 @@ export function AddToCartEnhanced({ product }: AddToCartEnhancedProps) {
     setBuyNowLoading(true);
 
     try {
-      const response = await fetch('/api/checkout/buy-now', {
+      // Check if user has a saved default address
+      const addressResponse = await fetch('/api/account/addresses/default');
+      const addressData = await addressResponse.json();
+
+      if (!addressData.address) {
+        // No saved address - add to cart and redirect to cart
+        addItem(product, selectedSize, quantity);
+
+        sonnerToast.info('Shipping info needed', {
+          description: 'Item added to cart. Please complete checkout from cart to add your shipping address.',
+        });
+
+        setTimeout(() => {
+          router.push('/cart');
+        }, 1000);
+        return;
+      }
+
+      // Has saved address - create order directly
+      const orderResponse = await fetch('/api/checkout/etransfer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          productSlug: product.slug,
-          size: selectedSize,
-          quantity,
-          useDefaultPayment: true, // Try to use saved payment method
+          items: [{
+            slug: product.slug,
+            size: selectedSize,
+            quantity,
+          }],
+          shippingAddress: {
+            name: addressData.address.name,
+            email: session.user.email,
+            phone: '',
+            street: addressData.address.street,
+            city: addressData.address.city,
+            province: addressData.address.province,
+            postalCode: addressData.address.postalCode,
+            country: addressData.address.country,
+          },
         }),
       });
 
-      const data = await response.json();
+      const orderData = await orderResponse.json();
 
-      if (!response.ok) {
-        // If no default payment method, redirect to checkout
-        if (data.error?.includes('default payment method')) {
-          sonnerToast.error('Please add a payment method first', {
-            description: 'Redirecting to checkout...',
-          });
+      if (orderData.success && orderData.orderNumber) {
+        sonnerToast.success('Order created!', {
+          description: `Order #${orderData.orderNumber}. Check your email for payment instructions.`,
+        });
 
-          // Add to cart first
-          addItem(product, selectedSize, quantity);
-
-          // Redirect to cart/checkout
-          setTimeout(() => {
-            router.push('/cart');
-          }, 1000);
-          return;
-        }
-
-        throw new Error(data.error || 'Failed to complete purchase');
-      }
-
-      if (data.checkoutUrl) {
-        // Redirect to Stripe checkout
-        window.location.href = data.checkoutUrl;
-      } else if (data.orderId) {
-        // Order completed successfully
-        sonnerToast.success('Order placed successfully!');
-        router.push(`/account?tab=orders`);
+        router.push(`/orders/${orderData.orderNumber}`);
+      } else {
+        throw new Error(orderData.error || 'Failed to create order');
       }
     } catch (error: any) {
       console.error('Buy Now error:', error);
@@ -310,7 +321,7 @@ export function AddToCartEnhanced({ product }: AddToCartEnhancedProps) {
         {session && (
           <p className="text-xs text-center text-gray-500">
             <Zap className="w-3 h-3 inline mr-1" />
-            {content['addToCart.buyNowHelp'] || 'Buy Now uses your saved address and payment method for instant checkout'}
+            {content['addToCart.buyNowHelp'] || 'Buy Now adds to cart and takes you directly to checkout'}
           </p>
         )}
       </div>
