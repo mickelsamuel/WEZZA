@@ -215,8 +215,8 @@ export function generateOrderConfirmationEmail(data: OrderConfirmationData): str
       </div>
 
       <center>
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}/account" class="button">
-          View Order Status
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}/orders/${escapeHtml(data.orderNumber)}" class="button">
+          Track Your Order
         </a>
       </center>
     </div>
@@ -273,8 +273,8 @@ export function generateShippingConfirmationEmail(data: ShippingConfirmationData
       </div>
 
       <center>
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}/account" class="button">
-          View Your Orders
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}/orders/${escapeHtml(data.orderNumber)}" class="button">
+          Track Your Order
         </a>
       </center>
 
@@ -429,8 +429,8 @@ export function generatePaymentConfirmationEmail(data: PaymentConfirmationData):
       </div>
 
       <center>
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}/account" class="button">
-          View Your Orders
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://wezza-store.vercel.app'}/orders/${escapeHtml(data.orderNumber)}" class="button">
+          Track Your Order
         </a>
       </center>
 

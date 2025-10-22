@@ -76,8 +76,15 @@ export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
         description: `Payment for order ${orderNumber} has been confirmed. Customer will receive a receipt email.`,
       });
 
-      // Refresh the page to show updated status
-      // Don't clear confirmingPayment state until refresh completes
+      // Update local state immediately for instant UI feedback
+      setOrders(orders.map(order =>
+        order.id === orderId
+          ? { ...order, paymentStatus: "confirmed", status: "processing" }
+          : order
+      ));
+      setConfirmingPayment(null);
+
+      // Refresh the page to get latest data from server
       router.refresh();
     } catch (error) {
       toast({
