@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, Clock, Package, Truck, XCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, Clock, Package, Truck, XCircle, AlertCircle, ArrowLeft, Home } from "lucide-react";
 
 interface OrderItem {
   slug: string;
@@ -148,6 +150,20 @@ export default function OrderStatusPage() {
   return (
     <div className="container mx-auto px-4 py-8 sm:py-12">
       <div className="mb-6">
+        <div className="flex items-center gap-4 mb-4">
+          <Link href="/shop">
+            <Button variant="ghost" size="sm" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Shop
+            </Button>
+          </Link>
+          <Link href="/">
+            <Button variant="ghost" size="sm" className="gap-2">
+              <Home className="h-4 w-4" />
+              Home
+            </Button>
+          </Link>
+        </div>
         <h1 className="font-heading text-3xl font-bold sm:text-4xl">Order Details</h1>
         <p className="mt-2 text-muted-foreground">Order #{order.orderNumber}</p>
       </div>
@@ -178,17 +194,29 @@ export default function OrderStatusPage() {
               <div className="mt-4 rounded-lg bg-yellow-50 p-4 border border-yellow-200">
                 <div className="flex gap-2">
                   <AlertCircle className="h-5 w-5 text-yellow-600 shrink-0" />
-                  <div>
-                    <h3 className="font-bold text-yellow-900">Payment Pending</h3>
-                    <p className="mt-1 text-sm text-yellow-800">
-                      Please send an e-transfer of ${formattedTotal} CAD to{" "}
-                      <strong>{process.env.NEXT_PUBLIC_ETRANSFER_EMAIL || "payments@wezza.com"}</strong>
-                    </p>
-                    <p className="mt-1 text-sm text-yellow-800">
-                      Include order number <strong>{order.orderNumber}</strong> in the message.
-                    </p>
-                    <p className="mt-2 text-sm text-yellow-800">
-                      <strong>Expires:</strong> {expiryDate.toLocaleString()}
+                  <div className="w-full">
+                    <h3 className="font-bold text-yellow-900">📧 E-Transfer Payment Instructions</h3>
+                    <div className="mt-3 space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-yellow-800 font-semibold">Amount:</span>
+                        <span className="text-lg font-bold text-yellow-900">${formattedTotal} CAD</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-yellow-800 font-semibold">Send to:</span>
+                        <span className="text-sm font-bold text-yellow-900">wezza28711@gmail.com</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-yellow-800 font-semibold">Order Number:</span>
+                        <span className="text-sm font-bold text-yellow-900">{order.orderNumber}</span>
+                      </div>
+                    </div>
+                    <div className="mt-3 p-2 bg-yellow-100 rounded border border-yellow-300">
+                      <p className="text-xs text-yellow-900">
+                        <strong>⚠️ Important:</strong> Include your order number <strong>{order.orderNumber}</strong> in the e-transfer message so we can identify your payment.
+                      </p>
+                    </div>
+                    <p className="mt-3 text-xs text-yellow-800">
+                      <strong>Payment expires:</strong> {expiryDate.toLocaleDateString()} at {expiryDate.toLocaleTimeString()}
                     </p>
                   </div>
                 </div>

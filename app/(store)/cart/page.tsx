@@ -103,10 +103,19 @@ export default function CartPage() {
         clearCart();
         // Redirect to order status page
         router.push(`/orders/${data.orderNumber}`);
-        toast({
-          title: "Order Created!",
-          description: `Check your email for payment instructions. Order #${data.orderNumber}`,
-        });
+
+        if (data.emailSent) {
+          toast({
+            title: "Order Created!",
+            description: `Check your email for payment instructions. Order #${data.orderNumber}`,
+          });
+        } else {
+          toast({
+            title: "Order Created!",
+            description: `Order #${data.orderNumber} created. Email notification failed - please check your order page for payment details.`,
+            variant: "default",
+          });
+        }
       } else {
         throw new Error(data.error || "Failed to create order");
       }

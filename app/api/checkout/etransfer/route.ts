@@ -132,6 +132,9 @@ export async function POST(request: NextRequest) {
     });
 
     // Send email with e-transfer instructions
+    let emailSent = true;
+    let emailError: string | null = null;
+
     try {
       await sendPaymentInstructionsEmail({
         orderNumber,
@@ -141,8 +144,15 @@ export async function POST(request: NextRequest) {
         items: orderItems,
         expiresAt,
       });
-    } catch (emailError) {
-      console.error("Failed to send payment instructions email:", emailError);
+    } catch (error) {
+      emailSent = false;
+      emailError = error instanceof Error ? error.message : "Unknown error";
+      console.error("Failed to send payment instructions email:", error);
+      console.error("Error details:", {
+        message: emailError,
+        resendApiKey: process.env.RESEND_API_KEY ? "Set" : "Not set",
+        fromEmail: process.env.RESEND_FROM_EMAIL || "Not set",
+      });
       // Don't fail the checkout if email fails - order is still created
     }
 
@@ -150,6 +160,8 @@ export async function POST(request: NextRequest) {
       success: true,
       orderId: order.id,
       orderNumber: order.orderNumber,
+      emailSent,
+      emailError: emailSent ? null : emailError,
     });
   } catch (error) {
     console.error("Checkout error:", error);
@@ -328,10 +340,15 @@ async function sendPaymentInstructionsEmail({
 </html>
   `;
 
-  await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL || "WEZZA <orders@wezza.com>",
+  // Use verified Resend email for testing, or custom domain if configured
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "WEZZA <onboarding@resend.dev>";
+
+  const result = await resend.emails.send({
+    from: fromEmail,
     to: customerEmail,
     subject: `Payment Instructions - Order ${orderNumber}`,
     html: htmlContent,
   });
+
+  console.log("Email sent successfully:", { id: result.data?.id, to: customerEmail });
 }
