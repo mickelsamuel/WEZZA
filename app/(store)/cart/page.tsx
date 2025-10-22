@@ -5,23 +5,57 @@ import { useState, useEffect } from "react";
 export const dynamic = "force-dynamic";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Price } from "@/components/price";
 import { QuantitySelector } from "@/components/quantity-selector";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Trash2, ShoppingBag } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
+interface ShippingFormData {
+  name: string;
+  email: string;
+  phone: string;
+  street: string;
+  city: string;
+  province: string;
+  postalCode: string;
+  country: string;
+}
+
 export default function CartPage() {
+  const router = useRouter();
   const [content, setContent] = useState<Record<string, string>>({});
   const items = useCartStore((state) => state.items);
+  const clearCart = useCartStore((state) => state.clearCart);
   const removeItem = useCartStore((state) => state.removeItem);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const getTotal = useCartStore((state) => state.getTotal());
   const { toast } = useToast();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
+  const [shippingData, setShippingData] = useState<ShippingFormData>({
+    name: "",
+    email: "",
+    phone: "",
+    street: "",
+    city: "",
+    province: "",
+    postalCode: "",
+    country: "Canada",
+  });
 
   useEffect(() => {
     fetch("/api/site-content?section=cart")
@@ -38,10 +72,16 @@ export default function CartPage() {
       });
   }, []);
 
-  const handleCheckout = async () => {
+  const handleCheckoutClick = () => {
+    setShowCheckoutDialog(true);
+  };
+
+  const handleShippingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsCheckingOut(true);
+
     try {
-      const response = await fetch("/api/checkout", {
+      const response = await fetch("/api/checkout/etransfer", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,24 +92,36 @@ export default function CartPage() {
             size: item.size,
             quantity: item.quantity,
           })),
+          shippingAddress: shippingData,
         }),
       });
 
       const data = await response.json();
 
-      if (data.url) {
-        window.location.href = data.url;
+      if (data.success && data.orderNumber) {
+        // Clear cart
+        clearCart();
+        // Redirect to order status page
+        router.push(`/orders/${data.orderNumber}`);
+        toast({
+          title: "Order Created!",
+          description: `Check your email for payment instructions. Order #${data.orderNumber}`,
+        });
       } else {
-        throw new Error(data.error || "Failed to create checkout session");
+        throw new Error(data.error || "Failed to create order");
       }
     } catch (error) {
       toast({
-        title: content["cart.error.title"] || "Checkout Error",
-        description: error instanceof Error ? error.message : (content["cart.error.description"] || "An error occurred"),
+        title: "Checkout Error",
+        description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
       setIsCheckingOut(false);
     }
+  };
+
+  const handleInputChange = (field: keyof ShippingFormData, value: string) => {
+    setShippingData((prev) => ({ ...prev, [field]: value }));
   };
 
   if (items.length === 0) {
@@ -199,20 +251,158 @@ export default function CartPage() {
             <Button
               size="lg"
               className="mt-4 w-full sm:mt-6"
-              onClick={handleCheckout}
-              disabled={isCheckingOut}
+              onClick={handleCheckoutClick}
             >
-              {isCheckingOut
-                ? (content["cart.checkout.processing"] || "Processing...")
-                : (content["cart.checkout.button"] || "Proceed to Checkout")}
+              {content["cart.checkout.button"] || "Proceed to Checkout"}
             </Button>
 
             <p className="mt-3 text-center text-xs text-muted-foreground sm:mt-4">
-              {content["cart.checkout.secure"] || "Secure checkout powered by Stripe"}
+              {content["cart.checkout.secure"] || "Secure e-transfer payment"}
             </p>
           </Card>
         </div>
       </div>
+
+      {/* Checkout Dialog */}
+      <Dialog open={showCheckoutDialog} onOpenChange={setShowCheckoutDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Shipping Information</DialogTitle>
+            <DialogDescription>
+              Please provide your shipping details to complete your order.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleShippingSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name *</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  required
+                  value={shippingData.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  required
+                  value={shippingData.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  placeholder="john@example.com"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone (Optional)</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={shippingData.phone}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
+                placeholder="(123) 456-7890"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="street">Street Address *</Label>
+              <Input
+                id="street"
+                type="text"
+                required
+                value={shippingData.street}
+                onChange={(e) => handleInputChange("street", e.target.value)}
+                placeholder="123 Main St"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="city">City *</Label>
+                <Input
+                  id="city"
+                  type="text"
+                  required
+                  value={shippingData.city}
+                  onChange={(e) => handleInputChange("city", e.target.value)}
+                  placeholder="Toronto"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="province">Province *</Label>
+                <Input
+                  id="province"
+                  type="text"
+                  required
+                  value={shippingData.province}
+                  onChange={(e) => handleInputChange("province", e.target.value)}
+                  placeholder="ON"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="postalCode">Postal Code *</Label>
+                <Input
+                  id="postalCode"
+                  type="text"
+                  required
+                  value={shippingData.postalCode}
+                  onChange={(e) => handleInputChange("postalCode", e.target.value)}
+                  placeholder="M5H 2N2"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="country">Country *</Label>
+                <Input
+                  id="country"
+                  type="text"
+                  required
+                  value={shippingData.country}
+                  onChange={(e) => handleInputChange("country", e.target.value)}
+                  placeholder="Canada"
+                />
+              </div>
+            </div>
+
+            <Separator className="my-4" />
+
+            <div className="rounded-lg bg-blue-50 p-4 border border-blue-200">
+              <h3 className="font-bold text-blue-900 mb-2">What happens next?</h3>
+              <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                <li>You'll receive an email with e-transfer payment instructions</li>
+                <li>Send the e-transfer to complete your order</li>
+                <li>We'll confirm payment within 24 hours</li>
+                <li>Your order will be shipped with free delivery</li>
+              </ol>
+            </div>
+
+            <div className="flex gap-4 justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCheckoutDialog(false)}
+                disabled={isCheckingOut}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isCheckingOut}>
+                {isCheckingOut ? "Creating Order..." : "Complete Order"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

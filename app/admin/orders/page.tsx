@@ -1,34 +1,46 @@
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatPrice } from "@/lib/currency";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
-const statusColors = {
-  pending: "warning",
-  processing: "default",
-  shipped: "default",
-  delivered: "success",
-  completed: "success",
-  cancelled: "destructive",
-} as const;
+import { ArrowLeft, AlertCircle } from "lucide-react";
+import { OrdersTable } from "./orders-table";
 
 async function getOrders() {
-  return await prisma.order.findMany({
+  const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
-    include: {
-      user: {
-        select: { name: true, email: true },
-      },
+    select: {
+      id: true,
+      orderNumber: true,
+      customerName: true,
+      customerEmail: true,
+      createdAt: true,
+      total: true,
+      currency: true,
+      status: true,
+      paymentStatus: true,
+      paymentMethod: true,
+      expiresAt: true,
     },
   });
+
+  // Convert to plain objects with serialized dates
+  return orders.map((order) => ({
+    ...order,
+    createdAt: order.createdAt.toISOString(),
+    expiresAt: order.expiresAt ? order.expiresAt.toISOString() : null,
+  }));
 }
 
 export default async function OrdersPage() {
   const orders = await getOrders();
+
+  // Count pending payments
+  const pendingPayments = orders.filter(
+    (order) =>
+      order.paymentStatus === "pending" &&
+      order.status === "pending_payment" &&
+      (!order.expiresAt || new Date(order.expiresAt) > new Date())
+  );
 
   return (
     <div className="space-y-6">
@@ -44,65 +56,36 @@ export default async function OrdersPage() {
         </div>
       </div>
 
+      {pendingPayments.length > 0 && (
+        <div className="rounded-lg bg-yellow-50 p-4 border border-yellow-200">
+          <div className="flex gap-2">
+            <AlertCircle className="h-5 w-5 text-yellow-600 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-bold text-yellow-900">
+                {pendingPayments.length} Order{pendingPayments.length !== 1 ? "s" : ""} Awaiting
+                Payment Confirmation
+              </h3>
+              <p className="text-sm text-yellow-800 mt-1">
+                Review pending e-transfers and confirm payments to process orders.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>All Orders</CardTitle>
           <CardDescription>
-            {orders.length} total order{orders.length !== 1 ? "s" : ""}
+            {orders.length} total order{orders.length !== 1 ? "s" : ""} • {pendingPayments.length}{" "}
+            pending payment{pendingPayments.length !== 1 ? "s" : ""}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {orders.length === 0 ? (
             <p className="text-center text-gray-500 py-8">No orders yet</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order ID</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orders.map((order: any) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-mono text-sm">
-                      {order.id.slice(0, 8)}...
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{order.customerName}</p>
-                        <p className="text-sm text-gray-500">
-                          {order.customerEmail}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="font-semibold">
-                      {formatPrice(order.total, order.currency)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={statusColors[order.status as keyof typeof statusColors]}>
-                        {order.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Link
-                        href={`/admin/orders/${order.id}`}
-                        className="text-brand-orange hover:underline text-sm"
-                      >
-                        View Details
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <OrdersTable initialOrders={orders} />
           )}
         </CardContent>
       </Card>

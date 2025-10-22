@@ -16,9 +16,6 @@ async function clearDatabase() {
     await prisma.stockNotification.deleteMany({});
     console.log("  ✓ Deleted StockNotifications");
 
-    await prisma.savedPaymentMethod.deleteMany({});
-    console.log("  ✓ Deleted SavedPaymentMethods");
-
     await prisma.userSizingProfile.deleteMany({});
     console.log("  ✓ Deleted UserSizingProfiles");
 

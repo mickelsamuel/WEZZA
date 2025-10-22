@@ -8,25 +8,25 @@ const requiredEnvVars = [
   'DIRECT_URL',
   'NEXTAUTH_SECRET',
   'NEXTAUTH_URL',
-  'STRIPE_SECRET_KEY',
-  'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',
   'RESEND_API_KEY',
   'RESEND_FROM_EMAIL',
   'NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME',
   'CLOUDINARY_API_KEY',
   'CLOUDINARY_API_SECRET',
   'NEXT_PUBLIC_SITE_URL',
+  'ETRANSFER_EMAIL', // Email address to receive e-transfers
 ] as const;
 
 const optionalEnvVars = [
   'CRON_SECRET', // Required for production cron endpoints
-  'STRIPE_WEBHOOK_SECRET', // Required for webhook verification
   'GOOGLE_CLIENT_ID', // Optional for OAuth
   'GOOGLE_CLIENT_SECRET', // Optional for OAuth
   'UPSTASH_REDIS_REST_URL', // Recommended for production rate limiting
   'UPSTASH_REDIS_REST_TOKEN', // Recommended for production rate limiting
   'ADMIN_IP_WHITELIST', // Optional for enhanced admin security
   'SENTRY_DSN', // Optional for error tracking
+  'ETRANSFER_SECURITY_QUESTION', // Optional security question for e-transfer
+  'ETRANSFER_SECURITY_ANSWER', // Optional security answer for e-transfer
 ] as const;
 
 export function validateEnvVars() {
@@ -44,9 +44,6 @@ export function validateEnvVars() {
   if (process.env.NODE_ENV === 'production') {
     if (!process.env.CRON_SECRET) {
       warnings.push('CRON_SECRET is not set - cron endpoints will be vulnerable');
-    }
-    if (!process.env.STRIPE_WEBHOOK_SECRET) {
-      warnings.push('STRIPE_WEBHOOK_SECRET is not set - webhook verification disabled');
     }
     if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
       warnings.push('Redis not configured - using in-memory rate limiting (not recommended for production)');

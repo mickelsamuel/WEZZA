@@ -78,7 +78,6 @@ model User {
   cart                  Cart?
   returnRequests        ReturnRequest[]
   stockNotifications    StockNotification[]
-  savedPaymentMethods   SavedPaymentMethod[]
   sizingProfile         UserSizingProfile?
   productCollaborations ProductCollaborator[]
 
@@ -90,31 +89,40 @@ model User {
 
 // Order model
 model Order {
-  id              String   @id @default(cuid())
-  userId          String?
-  stripeSessionId String   @unique
-  status          String   @default("pending") // pending, processing, shipped, delivered, completed, cancelled
-  total           Int // in cents
-  currency        String   @default("CAD")
-  items           Json // Array of cart items with product details
-  shippingAddress Json // Address object
-  customerEmail   String
-  customerName    String
-  trackingNumber  String? // Shipping tracking number
-  carrier         String? // "Canada Post", "UPS", "FedEx", etc.
-  statusHistory   Json[] // Array of {status, timestamp, note}
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                 String    @id @default(cuid())
+  userId             String?
+  orderNumber        String    @unique // Human-readable order number (e.g., "WEZZA-1001")
+  status             String    @default("pending_payment") // pending_payment, processing, shipped, delivered, completed, cancelled, expired
+  paymentMethod      String    @default("etransfer") // "etransfer", "stripe" (for backwards compatibility)
+  paymentStatus      String    @default("pending") // pending, confirmed, failed, refunded
+  paymentConfirmedBy String? // Admin user ID who confirmed payment
+  paymentConfirmedAt DateTime?
+  total              Int // in cents
+  currency           String    @default("CAD")
+  items              Json // Array of cart items with product details
+  shippingAddress    Json // Address object
+  customerEmail      String
+  customerName       String
+  customerPhone      String? // Optional phone number
+  trackingNumber     String? // Shipping tracking number
+  carrier            String? // "Canada Post", "UPS", "FedEx", etc.
+  statusHistory      Json[] // Array of {status, timestamp, note}
+  expiresAt          DateTime? // When unpaid order expires
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   user           User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
   returnRequests ReturnRequest[]
 
   @@index([userId])
-  @@index([stripeSessionId])
+  @@index([orderNumber])
   @@index([customerEmail])
   @@index([createdAt])
   @@index([status])
+  @@index([paymentStatus])
+  @@index([expiresAt])
   @@index([status, createdAt]) // Compound index for admin dashboard queries
+  @@index([paymentStatus, createdAt]) // Compound index for payment tracking
 }
 
 // Address model for saved addresses
@@ -330,24 +338,16 @@ model StockNotification {
   @@index([createdAt])
 }
 
-// Saved payment methods (Stripe)
-model SavedPaymentMethod {
-  id                    String   @id @default(cuid())
-  userId                String
-  stripePaymentMethodId String   @unique
-  type                  String // "card"
-  cardBrand             String? // "visa", "mastercard", etc.
-  cardLast4             String?
-  cardExpMonth          Int?
-  cardExpYear           Int?
-  isDefault             Boolean  @default(false)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([isDefault])
+// E-Transfer payment settings (site-wide configuration)
+model ETransferSettings {
+  id               String   @id @default(cuid())
+  recipientEmail   String // Email address to send e-transfers to
+  securityQuestion String? // Optional security question
+  securityAnswer   String? // Optional security answer
+  expirationHours  Int      @default(48) // Hours before unpaid order expires
+  instructions     String   @db.Text // Additional instructions for customers
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 // User sizing preferences for recommendation tool
