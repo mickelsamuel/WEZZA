@@ -14,12 +14,16 @@ async function getDashboardStats() {
     recentOrders,
   ] = await Promise.all([
     prisma.order.count(),
+    // Only count revenue from orders with confirmed payment
     prisma.order.aggregate({
       _sum: { total: true },
-      where: { status: { not: "cancelled" } },
+      where: {
+        paymentStatus: "confirmed",
+        status: { notIn: ["cancelled", "expired"] }
+      },
     }),
     prisma.user.count({ where: { role: "customer" } }),
-    prisma.order.count({ where: { status: "pending" } }),
+    prisma.order.count({ where: { status: "pending_payment" } }),
     prisma.order.findMany({
       take: 10,
       orderBy: { createdAt: "desc" },
@@ -59,9 +63,9 @@ export default async function AdminDashboard() {
       icon: "👥",
     },
     {
-      title: "Pending Orders",
+      title: "Pending Payments",
       value: stats.pendingOrders.toString(),
-      description: "Awaiting processing",
+      description: "Awaiting payment confirmation",
       icon: "⏳",
     },
   ];
