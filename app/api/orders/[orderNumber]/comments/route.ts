@@ -110,8 +110,12 @@ export async function POST(
     return NextResponse.json({ comment });
   } catch (error) {
     console.error("Error creating order comment:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to create comment";
     return NextResponse.json(
-      { error: "Failed to create comment" },
+      {
+        error: errorMessage,
+        details: error instanceof Error ? error.stack : String(error)
+      },
       { status: 500 }
     );
   }

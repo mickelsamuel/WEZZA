@@ -93,6 +93,10 @@ export default function OrderStatusPage() {
     }
   };
 
+  const formatStatus = (status: string) => {
+    return status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending_payment":
@@ -173,14 +177,14 @@ export default function OrderStatusPage() {
                 <div>
                   <h2 className="font-heading text-lg font-bold">Order Status</h2>
                   <Badge className={getStatusColor(order.status)}>
-                    {order.status.replace("_", " ").toUpperCase()}
+                    {formatStatus(order.status)}
                   </Badge>
                 </div>
               </div>
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">Payment Status</p>
                 <Badge className={getPaymentStatusColor(order.paymentStatus)}>
-                  {order.paymentStatus.toUpperCase()}
+                  {formatStatus(order.paymentStatus)}
                 </Badge>
               </div>
             </div>

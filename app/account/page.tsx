@@ -454,7 +454,7 @@ export default function AccountPage() {
                       size="sm"
                       variant="outline"
                       onClick={() => handleEditAddress(address)}
-                      className="border-white/20 text-white hover:bg-white/10"
+                      className="border-brand-orange/50 text-brand-orange hover:bg-brand-orange/10 hover:border-brand-orange"
                     >
                       <Edit className="h-4 w-4 mr-1" />
                       {content["account.addresses.editButton"] || "Edit"}

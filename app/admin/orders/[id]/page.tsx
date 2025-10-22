@@ -240,7 +240,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
           </Card>
 
           {/* Order Comments */}
-          <OrderComments orderNumber={order.orderNumber} />
+          <OrderComments orderNumber={order.orderNumber} isAdminView={true} />
         </div>
 
         {/* Sidebar */}

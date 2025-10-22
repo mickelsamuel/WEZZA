@@ -23,9 +23,10 @@ interface Comment {
 
 interface OrderCommentsProps {
   orderNumber: string;
+  isAdminView?: boolean; // Explicitly tell component if this is admin panel
 }
 
-export function OrderComments({ orderNumber }: OrderCommentsProps) {
+export function OrderComments({ orderNumber, isAdminView = false }: OrderCommentsProps) {
   const { data: session } = useSession();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -33,7 +34,8 @@ export function OrderComments({ orderNumber }: OrderCommentsProps) {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
 
-  const isAdmin = session?.user?.role === "admin";
+  // Only show admin features if explicitly in admin view AND user is admin
+  const isAdmin = isAdminView && session?.user?.role === "admin";
 
   useEffect(() => {
     fetchComments();
@@ -70,7 +72,8 @@ export function OrderComments({ orderNumber }: OrderCommentsProps) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send message");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send message");
       }
 
       const data = await response.json();
@@ -79,7 +82,8 @@ export function OrderComments({ orderNumber }: OrderCommentsProps) {
       setIsAdminOnly(false);
       toast.success("Message sent");
     } catch (error) {
-      toast.error("Failed to send message");
+      const errorMessage = error instanceof Error ? error.message : "Failed to send message";
+      toast.error(errorMessage);
       console.error("Error sending message:", error);
     } finally {
       setSending(false);
