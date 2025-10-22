@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/currency";
 import Link from "next/link";
-import { CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { CheckCircle, Clock, AlertCircle, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 
@@ -45,6 +45,7 @@ interface Order {
 export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [confirmingPayment, setConfirmingPayment] = useState<string | null>(null);
+  const [deletingOrder, setDeletingOrder] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -85,6 +86,42 @@ export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
       });
     } finally {
       setConfirmingPayment(null);
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: string, orderNumber: string) => {
+    if (!confirm(`Are you sure you want to delete order ${orderNumber}? This action cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingOrder(orderId);
+
+    try {
+      const response = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete order");
+      }
+
+      toast({
+        title: "Order Deleted",
+        description: `Order ${orderNumber} has been deleted successfully.`,
+      });
+
+      // Refresh the page to show updated list
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete order",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingOrder(null);
     }
   };
 
@@ -173,24 +210,42 @@ export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
                   >
                     View Details
                   </Link>
-                  {needsPaymentConfirmation && (
+                  <div className="flex gap-2">
+                    {needsPaymentConfirmation && (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => handleConfirmPayment(order.id, order.orderNumber)}
+                        disabled={confirmingPayment === order.id}
+                        className="w-fit"
+                      >
+                        {confirmingPayment === order.id ? (
+                          "Confirming..."
+                        ) : (
+                          <>
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Confirm
+                          </>
+                        )}
+                      </Button>
+                    )}
                     <Button
                       size="sm"
-                      variant="default"
-                      onClick={() => handleConfirmPayment(order.id, order.orderNumber)}
-                      disabled={confirmingPayment === order.id}
+                      variant="destructive"
+                      onClick={() => handleDeleteOrder(order.id, order.orderNumber)}
+                      disabled={deletingOrder === order.id}
                       className="w-fit"
                     >
-                      {confirmingPayment === order.id ? (
-                        "Confirming..."
+                      {deletingOrder === order.id ? (
+                        "Deleting..."
                       ) : (
                         <>
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          Confirm Payment
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
                         </>
                       )}
                     </Button>
-                  )}
+                  </div>
                 </div>
               </TableCell>
             </TableRow>

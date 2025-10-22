@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, Clock, Package, Truck, XCircle, AlertCircle, ArrowLeft, Home } from "lucide-react";
+import { CheckCircle, Clock, Package, Truck, XCircle, AlertCircle, ArrowLeft } from "lucide-react";
 
 interface OrderItem {
   slug: string;
@@ -150,17 +150,11 @@ export default function OrderStatusPage() {
   return (
     <div className="container mx-auto px-4 py-8 sm:py-12">
       <div className="mb-6">
-        <div className="flex items-center gap-4 mb-4">
-          <Link href="/shop">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Shop
-            </Button>
-          </Link>
+        <div className="mb-4">
           <Link href="/">
             <Button variant="ghost" size="sm" className="gap-2">
-              <Home className="h-4 w-4" />
-              Home
+              <ArrowLeft className="h-4 w-4" />
+              Back to Store
             </Button>
           </Link>
         </div>
